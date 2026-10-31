@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/game.css">
   <link rel="stylesheet" href="style.css">
   <script type="module" src="ui.js"></script>
 </head>
@@ -95,18 +96,7 @@
           <div class="who-chips" id="who-chips"></div>
         </header>
 
-        <div class="clock-wrap">
-          <button class="clock" id="clock" type="button" aria-label="Iniciar ou pausar o timer">
-            <svg class="clock-ring" viewBox="0 0 120 120" aria-hidden="true">
-              <circle class="clock-track" cx="60" cy="60" r="54" />
-              <circle class="clock-progress" id="clock-progress" cx="60" cy="60" r="54" pathLength="100" />
-            </svg>
-            <span class="clock-center">
-              <span class="clock-time" id="clock-time">1:00</span>
-              <span class="clock-hint" id="clock-hint">Toque para começar</span>
-            </span>
-          </button>
-        </div>
+        <div class="clock-wrap" id="clock-wrap"></div>
 
         <button class="restart glass" id="btn-restart" type="button">↺ Reiniciar</button>
         <div class="result" id="result"></div>

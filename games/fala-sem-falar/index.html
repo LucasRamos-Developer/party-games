@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Fala Sem Falar</title>
+  <meta name="description" content="Explique a palavra para a sua equipe sem dizer as proibidas.">
+  <meta name="theme-color" content="#07060f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/game.css">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="ui.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="btn btn-ghost" href="../../">← Jogos</a>
+    <h1 class="brand">Fala <span>Sem</span> Falar</h1>
+  </header>
+
+  <main class="container" id="screen-pre">
+    <section id="screen-loading" class="muted">Carregando…</section>
+
+    <section id="screen-resume" class="narrow stack" hidden>
+      <div class="card stack">
+        <h2>Partida em andamento</h2>
+        <ul class="resume-list" id="resume-list"></ul>
+        <div class="row wrap">
+          <button class="btn btn-primary btn-lg" id="btn-continue" type="button">Continuar partida</button>
+          <button class="btn btn-lg" id="btn-new" type="button">Nova partida</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-setup" class="stack" hidden>
+      <section class="card stack how">
+        <h2>Como jogar</h2>
+        <ol>
+          <li>Na vez da sua equipe, um jogador pega o tablet e explica a palavra da carta.</li>
+          <li>Não pode dizer a palavra nem as 4 proibidas (nem partes delas). Nada de gestos ou sons.</li>
+          <li>A equipe adversária fiscaliza: falou proibida, toca em <b>✗ Proibida</b> (−1).</li>
+          <li>Cada acerto vale +1. Ao fim do tempo, quem chegar à meta primeiro vence.</li>
+        </ol>
+      </section>
+      <div id="teams-setup" class="setup-grid"></div>
+      <section class="card stack">
+        <h2>Opções</h2>
+        <div class="options-grid">
+          <label class="field">
+            <span>Tempo do turno</span>
+            <select id="opt-timer"><option value="30">30 segundos</option><option value="45">45 segundos</option><option value="60" selected>1 minuto</option><option value="90">1 min 30 s</option><option value="120">2 minutos</option></select>
+          </label>
+          <label class="field">
+            <span>Meta de pontos</span>
+            <select id="opt-goal"><option value="15">15 pontos</option><option value="20">20 pontos</option><option value="30" selected>30 pontos</option><option value="40">40 pontos</option><option value="50">50 pontos</option></select>
+          </label>
+          <label class="switch-field">
+            <input type="checkbox" id="opt-skip">
+            <span class="switch" aria-hidden="true"></span>
+            <span>Pular custa 1 ponto</span>
+          </label>
+        </div>
+      </section>
+      <p class="error" id="setup-error" role="alert"></p>
+      <button class="btn btn-primary btn-lg" id="btn-start" type="button">Começar partida</button>
+    </section>
+  </main>
+
+  <main id="screen-game" class="game" hidden>
+    <header class="hud glass">
+      <ul class="hud-teams" id="hud-teams"></ul>
+      <button class="hud-btn" id="btn-undo" type="button" title="Desfazer" aria-label="Desfazer">↶</button>
+      <button class="hud-btn" id="btn-fullscreen" type="button" title="Tela cheia" aria-label="Tela cheia">⛶</button>
+      <button class="hud-btn" id="btn-menu" type="button" title="Menu" aria-label="Menu">☰</button>
+    </header>
+    <section class="play-area" id="play" aria-live="polite"></section>
+    <div class="flash" aria-hidden="true"></div>
+  </main>
+
+  <dialog id="menu-dialog">
+    <form method="dialog" class="stack">
+      <h2>Menu</h2>
+      <button class="btn" value="restart">Reiniciar com as mesmas equipes</button>
+      <button class="btn" value="setup">Mudar jogadores e equipes</button>
+      <a class="btn" href="../../">Voltar para a central</a>
+      <button class="btn btn-ghost" value="cancel">Fechar</button>
+    </form>
+  </dialog>
+</body>
+</html>

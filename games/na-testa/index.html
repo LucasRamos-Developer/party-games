@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Na Testa</title>
+  <meta name="description" content="Celular na testa: a equipe dá as dicas e você adivinha.">
+  <meta name="theme-color" content="#07060f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/game.css">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="ui.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="btn btn-ghost" href="../../">← Jogos</a>
+    <h1 class="brand">Na <span>Testa</span></h1>
+  </header>
+
+  <main class="container" id="screen-pre">
+    <section id="screen-loading" class="muted">Carregando…</section>
+
+    <section id="screen-resume" class="narrow stack" hidden>
+      <div class="card stack">
+        <h2>Partida em andamento</h2>
+        <ul class="resume-list" id="resume-list"></ul>
+        <div class="row wrap">
+          <button class="btn btn-primary btn-lg" id="btn-continue" type="button">Continuar partida</button>
+          <button class="btn btn-lg" id="btn-new" type="button">Nova partida</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-setup" class="stack" hidden>
+      <section class="card stack how">
+        <h2>Como jogar</h2>
+        <ol>
+          <li>Um jogador segura o aparelho na testa, com a tela virada para a equipe, sem olhar.</li>
+          <li>A equipe dá dicas (ou faz mímica, na categoria Ações) para ele adivinhar.</li>
+          <li>Acertou: incline a tela para baixo (ou toque na metade direita). Passar: para cima (ou metade esquerda).</li>
+          <li>Cada acerto vale 1 ponto. Depois das rodadas, vence quem tiver mais pontos.</li>
+        </ol>
+      </section>
+      <div id="teams-setup" class="setup-grid"></div>
+      <section class="card stack">
+        <h2>Opções</h2>
+        <div class="options-grid">
+          <label class="field">
+            <span>Tempo do turno</span>
+            <select id="opt-timer"><option value="30">30 segundos</option><option value="45">45 segundos</option><option value="60" selected>1 minuto</option><option value="90">1 min 30 s</option><option value="120">2 minutos</option></select>
+          </label>
+          <label class="field">
+            <span>Rodadas</span>
+            <select id="opt-rounds"><option value="2">2 rodadas</option><option value="3" selected>3 rodadas</option><option value="4">4 rodadas</option><option value="5">5 rodadas</option></select>
+          </label>
+          <label class="field">
+            <span>Controle</span>
+            <select id="opt-control"><option value="tilt" selected>Inclinar o aparelho</option><option value="tap">Tocar na tela</option></select>
+          </label>
+          <div class="check-chips" id="opt-categories" role="group" aria-label="Categorias"></div>
+        </div>
+      </section>
+      <p class="error" id="setup-error" role="alert"></p>
+      <button class="btn btn-primary btn-lg" id="btn-start" type="button">Começar partida</button>
+    </section>
+  </main>
+
+  <main id="screen-game" class="game" hidden>
+    <header class="hud glass">
+      <ul class="hud-teams" id="hud-teams"></ul>
+      <button class="hud-btn" id="btn-undo" type="button" title="Desfazer" aria-label="Desfazer">↶</button>
+      <button class="hud-btn" id="btn-fullscreen" type="button" title="Tela cheia" aria-label="Tela cheia">⛶</button>
+      <button class="hud-btn" id="btn-menu" type="button" title="Menu" aria-label="Menu">☰</button>
+    </header>
+    <section class="play-area" id="play" aria-live="polite"></section>
+    <div class="flash" aria-hidden="true"></div>
+  </main>
+
+  <dialog id="menu-dialog">
+    <form method="dialog" class="stack">
+      <h2>Menu</h2>
+      <button class="btn" value="restart">Reiniciar com as mesmas equipes</button>
+      <button class="btn" value="setup">Mudar jogadores e equipes</button>
+      <a class="btn" href="../../">Voltar para a central</a>
+      <button class="btn btn-ghost" value="cancel">Fechar</button>
+    </form>
+  </dialog>
+</body>
+</html>

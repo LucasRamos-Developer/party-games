@@ -1,0 +1,83 @@
+.handoff .clock-wrap {
+  flex: none;
+  width: 100%;
+  height: min(38vh, 340px);
+  min-height: 160px;
+}
+
+.turn-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.turn-top .clock-wrap {
+  flex: none;
+  width: clamp(110px, 20vh, 170px);
+  height: clamp(110px, 20vh, 170px);
+  min-height: 0;
+}
+
+.turn-info {
+  min-width: 0;
+}
+
+.turn-score {
+  font: 800 clamp(1.4rem, 3.5vw, 2rem) var(--font-display);
+  color: #fff;
+}
+
+.taboo-card {
+  flex: 1;
+  min-height: 0;
+  transition: filter 0.2s ease;
+}
+
+.forbidden-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ff3b5c;
+}
+
+.forbidden {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.forbidden li {
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid rgb(255 59 92 / 0.6);
+  background: rgb(255 59 92 / 0.1);
+  color: #ffd0d8;
+  font: 800 clamp(1rem, 2.6vw, 1.4rem) var(--font-display);
+}
+
+/* pausado: esconde a carta para ninguém ganhar tempo */
+.is-paused .taboo-card {
+  filter: blur(18px);
+}
+
+.trio {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.3fr;
+  gap: 10px;
+}
+
+@media (max-width: 520px) {
+  .trio {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .trio [data-mark="hit"] {
+    grid-column: 1 / -1;
+    order: -1;
+  }
+}

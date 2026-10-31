@@ -1,6 +1,7 @@
 import { storage } from '../../assets/js/core/storage.js';
 import { createDie, renderPips } from '../../assets/js/core/dice.js';
-import { createTimer, formatTime } from '../../assets/js/core/timer.js';
+import { createTimer } from '../../assets/js/core/timer.js';
+import { boom as boomFx, mountClock } from '../../assets/js/core/clock.js';
 import { mountTeamsSetup } from '../../assets/js/core/teams-setup.js';
 import { $, esc } from '../../assets/js/core/dom.js';
 import {
@@ -39,7 +40,8 @@ let bigDie = null;
 const selected = new Set();
 
 const boards = { small: createBoardView($('#board-mini')), large: createBoardView($('#board-large')) };
-const timer = createTimer({ onTick: updateClock, onEnd: boom });
+const timer = createTimer({ onTick: updateClock, onEnd: () => boomFx($('#screen-game')) });
+const clock = mountClock($('#clock-wrap'), { onTap: onClockTap, stateEl: $('#timer-area') });
 
 // Destaca a face sorteada dentro de um grupo de botões [data-face].
 const highlightFace = (node, value) =>
@@ -323,34 +325,8 @@ function renderSidebar(s) {
 }
 
 function updateClock(remaining, total) {
-  const done = remaining <= 0;
-  const running = timer?.running ?? false;
-  $('#clock-time').textContent = done ? 'Tempo!' : formatTime(remaining);
-  $('#clock-progress').style.strokeDashoffset = String(100 - (remaining / total) * 100);
-  const area = $('#timer-area');
-  area.classList.toggle('is-running', running);
-  area.classList.toggle('is-warn', running && remaining <= 10000);
-  area.classList.toggle('is-danger', running && remaining <= 3000);
-  area.classList.toggle('is-done', done);
-  const phase = game?.state.phase;
-  $('#clock-hint').textContent =
-    phase !== 'drawing'
-      ? 'Toque para começar'
-      : running
-        ? 'Toque para pausar'
-        : done
-          ? 'Toque para recomeçar'
-          : remaining < total
-            ? 'Pausado · toque para continuar'
-            : 'Toque para começar';
-}
-
-function boom() {
-  const screen = $('#screen-game');
-  screen.classList.remove('is-boom');
-  void screen.offsetWidth; // reinicia a animação
-  screen.classList.add('is-boom');
-  setTimeout(() => screen.classList.remove('is-boom'), 1400);
+  const ready = game?.state.phase !== 'drawing';
+  clock.update(remaining, total, { running: timer?.running ?? false, hint: ready ? 'Toque para começar' : undefined });
 }
 
 function renderAdjust() {
@@ -432,7 +408,7 @@ function restartSameTeams() {
 // ---------- eventos ----------
 
 // O relógio é o botão principal: inicia a rodada e depois pausa/continua.
-$('#clock').addEventListener('click', async () => {
+async function onClockTap() {
   if (busy) return;
   const s = game.state;
   if (s.phase === 'ready') {
@@ -444,7 +420,7 @@ $('#clock').addEventListener('click', async () => {
   } else if (s.phase === 'drawing') {
     timer.toggle();
   }
-});
+}
 
 // Reiniciar no meio da rodada pergunta o resultado antes.
 $('#btn-restart').addEventListener('click', () => {

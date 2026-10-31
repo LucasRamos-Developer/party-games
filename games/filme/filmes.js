@@ -1,0 +1,248 @@
+// Filmes do "Que Filme É Esse?". Cada um tem uma dica geral e 5 etapas, da
+// mais difícil para a mais fácil (valem 10, 8, 6, 4 e 2 pontos).
+//
+// Imagens opcionais: coloque 5 arquivos em games/filme/frames/<id>/ e liste
+// em `frames` (ex.: frames: ['1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg']).
+// Quando uma etapa tem imagem, ela aparece no lugar da pista em texto.
+export const FILMES = [
+  {
+    id: 'rei-leao',
+    titulo: 'O Rei Leão',
+    dica: 'Animação · anos 90',
+    etapas: [
+      '🌅 Ao amanhecer, todos os bichos se reúnem para conhecer um recém-nascido.',
+      '👑 Um tio invejoso quer o trono do irmão.',
+      '🐗 Dois amigos ensinam que é bom viver sem preocupações.',
+      '🦁 O filhote foge de casa achando que a culpa foi dele.',
+      '🦁👑 Simba, Mufasa e "Hakuna Matata".',
+    ],
+  },
+  {
+    id: 'toy-story',
+    titulo: 'Toy Story',
+    dica: 'Animação · anos 90',
+    etapas: [
+      '🧸 Tudo acontece quando os donos saem do quarto.',
+      '🎂 Uma festa de aniversário deixa todo mundo nervoso com o presente novo.',
+      '🚀 O novato acha que é um patrulheiro espacial de verdade.',
+      '🤠 Um caubói de pano morre de ciúmes do brinquedo novo.',
+      '🤠🚀 Woody e Buzz Lightyear: "Ao infinito e além!"',
+    ],
+  },
+  {
+    id: 'nemo',
+    titulo: 'Procurando Nemo',
+    dica: 'Animação · anos 2000',
+    etapas: [
+      '🌊 Um pai superprotetor mora dentro de uma anêmona.',
+      '🐠 O filho tem uma nadadeira menor que a outra.',
+      '🐟 Uma amiga azul esquece tudo em poucos segundos.',
+      '🦈 Tubarões que prometem não comer peixe.',
+      '🐠 Um peixe-palhaço atravessa o oceano atrás do filho.',
+    ],
+  },
+  {
+    id: 'frozen',
+    titulo: 'Frozen',
+    dica: 'Animação · anos 2010',
+    etapas: [
+      '🚪 Duas irmãs separadas por uma porta fechada durante anos.',
+      '🏰 Uma festa de coroação que dá muito errado.',
+      '⛄ Um boneco de neve que sonha com o verão.',
+      '❄️ Poderes de gelo que ela não consegue controlar.',
+      '❄️👭 Elsa, Anna e o boneco Olaf.',
+    ],
+  },
+  {
+    id: 'shrek',
+    titulo: 'Shrek',
+    dica: 'Animação · anos 2000',
+    etapas: [
+      '🏞️ Um pântano invadido por personagens de contos de fadas.',
+      '🫏 Um burro que não para de falar.',
+      '🐉 Uma dragoa que se apaixona.',
+      '👸 Uma princesa com um segredo que aparece ao pôr do sol.',
+      '🟢 Um ogro verde resgata a princesa Fiona.',
+    ],
+  },
+  {
+    id: 'harry-potter',
+    titulo: 'Harry Potter e a Pedra Filosofal',
+    dica: 'Fantasia · anos 2000',
+    etapas: [
+      '📬 Cartas que não param de chegar numa casa.',
+      '🚂 Uma plataforma de trem que não deveria existir.',
+      '🎩 Um chapéu que decide para onde você vai.',
+      '🧹 Um esporte jogado em cima de vassouras.',
+      '⚡ O menino bruxo com a cicatriz de raio.',
+    ],
+  },
+  {
+    id: 'titanic',
+    titulo: 'Titanic',
+    dica: 'Romance · anos 90',
+    etapas: [
+      '💎 Uma senhora conta a história de um colar.',
+      '🃏 Uma passagem ganha num jogo de cartas.',
+      '🎨 Um desenho feito à mão numa cabine.',
+      '🧊 Um iceberg no meio do caminho.',
+      '🚢 O navio "inafundável": Jack e Rose na proa.',
+    ],
+  },
+  {
+    id: 'jurassic-park',
+    titulo: 'Jurassic Park',
+    dica: 'Aventura · anos 90',
+    etapas: [
+      '🦟 Um mosquito preso dentro de âmbar.',
+      '🏝️ Uma ilha com um parque que ainda não abriu.',
+      '💧 Um copo d\'água que treme sozinho.',
+      '🚙 Os visitantes descobrem que as atrações estão soltas.',
+      '🦖 Um parque cheio de dinossauros clonados.',
+    ],
+  },
+  {
+    id: 'de-volta-para-o-futuro',
+    titulo: 'De Volta para o Futuro',
+    dica: 'Aventura · anos 80',
+    etapas: [
+      '🎸 Um adolescente que toca guitarra alto demais.',
+      '⚡ O relógio de uma torre atingido por um raio.',
+      '👨‍🔬 Um cientista maluco e seu cachorro.',
+      '🚗 Um carro que precisa chegar a 88 milhas por hora.',
+      '⏰ Marty McFly viaja no tempo num DeLorean.',
+    ],
+  },
+  {
+    id: 'et',
+    titulo: 'E.T. – O Extraterrestre',
+    dica: 'Ficção científica · anos 80',
+    etapas: [
+      '🌲 Uma nave vai embora e deixa alguém para trás numa floresta.',
+      '🍬 Uma trilha de balinhas para atrair um visitante.',
+      '☎️ Ele só quer telefonar.',
+      '🚲 Bicicletas voando na frente da lua.',
+      '👽 Um alienígena baixinho com o dedo que brilha.',
+    ],
+  },
+  {
+    id: 'incriveis',
+    titulo: 'Os Incríveis',
+    dica: 'Animação · anos 2000',
+    etapas: [
+      '🦸 Heróis proibidos de usar os poderes.',
+      '🏠 Uma família tentando parecer normal no subúrbio.',
+      '👗 Uma estilista baixinha que odeia capas.',
+      '🧊 O melhor amigo do pai congela tudo.',
+      '🦸‍♂️ A família Pêra de super-heróis.',
+    ],
+  },
+  {
+    id: 'up',
+    titulo: 'Up – Altas Aventuras',
+    dica: 'Animação · anos 2000',
+    etapas: [
+      '💑 Um casal junta moedas num pote para uma viagem.',
+      '📮 Uma caixa de correio muito especial.',
+      '🐦 Um pássaro colorido que adora chocolate.',
+      '🐕 Um cachorro com uma coleira que fala.',
+      '🎈 Uma casa voando presa a milhares de balões.',
+    ],
+  },
+  {
+    id: 'divertida-mente',
+    titulo: 'Divertida Mente',
+    dica: 'Animação · anos 2010',
+    etapas: [
+      '🏠 Uma menina se muda de cidade e fica triste.',
+      '🏝️ Ilhas de personalidade começam a desabar.',
+      '🐘 Um amigo imaginário feito de algodão-doce.',
+      '🔵 Esferas de memória coloridas.',
+      '😄😢😡 Alegria, Tristeza, Raiva, Medo e Nojinho dentro da cabeça.',
+    ],
+  },
+  {
+    id: 'carros',
+    titulo: 'Carros',
+    dica: 'Animação · anos 2000',
+    etapas: [
+      '🏁 Um novato arrogante quer ganhar uma copa.',
+      '🛣️ Uma cidadezinha esquecida à beira da estrada.',
+      '🚜 Assustar tratores de madrugada.',
+      '🔧 Um guincho enferrujado vira o melhor amigo.',
+      '🏎️ Relâmpago McQueen: "Katchau!"',
+    ],
+  },
+  {
+    id: 'era-do-gelo',
+    titulo: 'A Era do Gelo',
+    dica: 'Animação · anos 2000',
+    etapas: [
+      '🌰 Uma noz que causa problemas enormes.',
+      '🐿️ Um bichinho que nunca desiste da sua noz.',
+      '👶 Três bichos tentam devolver um bebê humano.',
+      '🦥 Uma preguiça desastrada e um mamute rabugento.',
+      '🦣 Manny, Sid e Diego numa época congelada.',
+    ],
+  },
+  {
+    id: 'magico-de-oz',
+    titulo: 'O Mágico de Oz',
+    dica: 'Clássico · anos 30',
+    etapas: [
+      '🌪️ Um tornado leva uma casa embora.',
+      '👠 Sapatinhos vermelhos brilhantes.',
+      '🧱 Uma estrada de tijolos amarelos.',
+      '🦁 Um leão medroso, um homem de lata e um espantalho.',
+      '🏡 Dorothy só quer voltar para o Kansas.',
+    ],
+  },
+  {
+    id: 'esqueceram-de-mim',
+    titulo: 'Esqueceram de Mim',
+    dica: 'Comédia · anos 90',
+    etapas: [
+      '✈️ Uma família inteira viaja no Natal.',
+      '🏠 Uma casa enorme só para uma criança.',
+      '😱 Loção pós-barba e um grito na frente do espelho.',
+      '🪤 Armadilhas caseiras contra dois ladrões.',
+      '🎄 Kevin sozinho em casa no Natal.',
+    ],
+  },
+  {
+    id: 'moana',
+    titulo: 'Moana',
+    dica: 'Animação · anos 2010',
+    etapas: [
+      '🌊 O oceano escolhe uma menina.',
+      '🐓 Uma galinha muito, muito distraída.',
+      '🥥 Piratas pequenininhos vestidos de coco.',
+      '🪝 Um semideus com um anzol mágico e tatuagens que se mexem.',
+      '⛵ A jovem navegadora que devolve o coração de Te Fiti.',
+    ],
+  },
+  {
+    id: 'ratatouille',
+    titulo: 'Ratatouille',
+    dica: 'Animação · anos 2000',
+    etapas: [
+      '🗼 Paris e um restaurante em decadência.',
+      '📖 "Qualquer um pode cozinhar."',
+      '🧹 Um ajudante de cozinha desajeitado.',
+      '🧑‍🍳 Alguém controla o cozinheiro puxando o cabelo dele.',
+      '🐀 Um rato chef chamado Remy.',
+    ],
+  },
+  {
+    id: 'encanto',
+    titulo: 'Encanto',
+    dica: 'Animação · anos 2020',
+    etapas: [
+      '🕯️ Uma vela mágica que nunca se apaga.',
+      '🏠 Uma casa viva cheia de rachaduras.',
+      '💪 Uma irmã fortíssima que carrega tudo.',
+      '🚪 Todos da família ganharam um dom, menos uma.',
+      '🦋 A família Madrigal e o tio Bruno, de quem ninguém fala.',
+    ],
+  },
+];

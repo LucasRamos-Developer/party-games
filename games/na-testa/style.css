@@ -1,0 +1,116 @@
+/* Na testa: palavra ocupa a tela toda e o HUD some. */
+.game.is-forehead .hud {
+  display: none;
+}
+
+.game.is-forehead .play-area {
+  inset: 0;
+}
+
+.game.is-forehead .play-area > * {
+  width: 100%;
+}
+
+.forehead {
+  position: relative;
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+}
+
+.zone {
+  display: flex;
+  align-items: flex-end;
+  padding: 18px 24px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zone span {
+  font: 800 1rem var(--font);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.45;
+}
+
+.zone-pass {
+  color: #ffb35c;
+}
+
+.zone-hit {
+  justify-content: flex-end;
+  color: #2bff88;
+}
+
+.forehead-word {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px 48px;
+  pointer-events: none;
+  text-align: center;
+  font: 800 clamp(3rem, 13vmin, 9rem) / 1 var(--font-display);
+  color: #fff;
+  text-shadow: 0 0 14px var(--clock), 0 0 48px var(--clock);
+  overflow-wrap: anywhere;
+}
+
+.forehead-word.pop {
+  animation: card-pop 0.35s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+.forehead .clock-wrap {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  translate: -50% 0;
+  width: clamp(90px, 18vmin, 140px);
+  height: clamp(90px, 18vmin, 140px);
+  min-height: 0;
+  z-index: 2;
+}
+
+.forehead-count {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  font: 800 1.6rem var(--font-display);
+  color: #2bff88;
+  text-shadow: 0 0 10px #2bff88;
+  pointer-events: none;
+}
+
+.forehead::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.forehead[data-feedback="hit"]::after {
+  background: rgb(43 255 136 / 0.45);
+  animation: flash 0.6s ease-out both;
+}
+
+.forehead[data-feedback="pass"]::after {
+  background: rgb(255 138 0 / 0.45);
+  animation: flash 0.6s ease-out both;
+}
+
+.countdown {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.count-num {
+  font: 800 clamp(6rem, 30vmin, 14rem) / 1 var(--font-display);
+  color: #fff;
+  text-shadow: 0 0 16px var(--clock), 0 0 60px var(--clock);
+}

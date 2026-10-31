@@ -1,0 +1,90 @@
+.nota-big {
+  font: 800 clamp(7rem, 34vmin, 16rem) / 1 var(--font-display);
+  color: #fff;
+  text-shadow: 0 0 18px var(--clock), 0 0 70px var(--clock);
+}
+
+.nota-big.pop {
+  animation: card-pop 0.45s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+.nota-big.is-hit {
+  text-shadow: 0 0 18px #2bff88, 0 0 70px #2bff88;
+}
+
+.nota-big.is-miss {
+  text-shadow: 0 0 18px #ff3b5c, 0 0 70px #ff3b5c;
+}
+
+.scale {
+  display: flex;
+  gap: 24px;
+  color: var(--ink-2);
+  font-weight: 700;
+}
+
+.prize {
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.prize b {
+  font: 800 1.6rem var(--font-display);
+  color: #ffd23f;
+  text-shadow: 0 0 10px rgb(255 210 63 / 0.7);
+}
+
+.question-card {
+  flex: 1;
+  min-height: 0;
+}
+
+.q-kind {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--clock) 70%, #fff);
+}
+
+.q-text {
+  font: 800 clamp(1.8rem, 5.5vw, 3.6rem) / 1.1 var(--font-display);
+  color: #fff;
+  text-shadow: 0 0 12px var(--clock);
+}
+
+.q-sub {
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+.q-count {
+  text-align: center;
+  color: var(--ink-2);
+  font-weight: 700;
+}
+
+.extra .neon-btn {
+  min-height: 56px;
+  font-size: 1.1rem;
+}
+
+.nota-pad {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-content: center;
+  gap: 12px;
+}
+
+.nota-pad .num {
+  aspect-ratio: 1;
+  max-height: none;
+}
+
+@media (max-width: 640px) {
+  .nota-pad {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
