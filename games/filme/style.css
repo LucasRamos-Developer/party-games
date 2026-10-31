@@ -131,9 +131,11 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  border-radius: 22px;
-  border: 1px solid var(--line);
-  background: rgb(255 255 255 / 0.04);
+  /* mesma moldura do card da dica, na cor da equipe da vez */
+  border-radius: 28px;
+  border: 2px solid var(--clock);
+  background: color-mix(in srgb, var(--clock) 8%, rgb(255 255 255 / 0.04));
+  box-shadow: 0 0 28px color-mix(in srgb, var(--clock) 35%, transparent), inset 0 0 24px color-mix(in srgb, var(--clock) 12%, transparent);
 }
 
 .guesses-head {
