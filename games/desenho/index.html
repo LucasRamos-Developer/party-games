@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Rabisco &amp; Adivinha</title>
+  <meta name="description" content="Timer, equipes, dados e tabuleiro para jogar desenho e adivinhação em equipes.">
+  <meta name="theme-color" content="#07060f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="ui.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="btn btn-ghost" href="../../">← Jogos</a>
+    <h1 class="brand">Rabisco <span>&amp;</span> Adivinha</h1>
+  </header>
+
+  <main class="container" id="screen-pre">
+    <section id="screen-loading" class="muted">Carregando…</section>
+
+    <section id="screen-resume" class="narrow stack" hidden>
+      <div class="card stack">
+        <h2>Partida em andamento</h2>
+        <ul class="resume-list" id="resume-list"></ul>
+        <div class="row wrap">
+          <button class="btn btn-primary btn-lg" id="btn-continue" type="button">Continuar partida</button>
+          <button class="btn btn-lg" id="btn-new" type="button">Nova partida</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-setup" class="stack" hidden>
+      <div id="teams-setup" class="setup-grid"></div>
+      <section class="card stack">
+        <h2>Opções</h2>
+        <div class="options-grid">
+          <label class="field">
+            <span>Tempo da rodada</span>
+            <select id="opt-timer">
+              <option value="30">30 segundos</option>
+              <option value="45">45 segundos</option>
+              <option value="60" selected>1 minuto</option>
+              <option value="90">1 min 30 s</option>
+              <option value="120">2 minutos</option>
+              <option value="180">3 minutos</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Modo</span>
+            <select id="opt-style">
+              <option value="desenho" selected>Desenho</option>
+              <option value="mimica">Mímica</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Mostrar tabuleiro</span>
+            <select id="opt-board">
+              <option value="off">Oculto</option>
+              <option value="small" selected>Pequeno</option>
+              <option value="large">Grande</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Tamanho do tabuleiro</span>
+            <select id="opt-board-size">
+              <option value="curto">Curto (32 casas)</option>
+              <option value="normal" selected>Normal (48 casas)</option>
+              <option value="longo">Longo (64 casas)</option>
+            </select>
+          </label>
+          <label class="switch-field">
+            <input type="checkbox" id="opt-dice" checked>
+            <span class="switch" aria-hidden="true"></span>
+            <span>Dados virtuais</span>
+          </label>
+        </div>
+      </section>
+      <p class="error" id="setup-error" role="alert"></p>
+      <button class="btn btn-primary btn-lg" id="btn-start" type="button">Começar partida</button>
+    </section>
+  </main>
+
+  <main id="screen-game" class="game" hidden>
+    <section class="stage" id="stage">
+      <div class="cats glass" id="cats" role="group" aria-label="Categoria"></div>
+
+      <div class="timer-area" id="timer-area">
+        <header class="who" id="who" aria-live="polite">
+          <p class="who-kicker" id="who-kicker"></p>
+          <h2 class="who-title" id="who-title"></h2>
+          <div class="who-chips" id="who-chips"></div>
+        </header>
+
+        <div class="clock-wrap">
+          <button class="clock" id="clock" type="button" aria-label="Iniciar ou pausar o timer">
+            <svg class="clock-ring" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="clock-track" cx="60" cy="60" r="54" />
+              <circle class="clock-progress" id="clock-progress" cx="60" cy="60" r="54" pathLength="100" />
+            </svg>
+            <span class="clock-center">
+              <span class="clock-time" id="clock-time">1:00</span>
+              <span class="clock-hint" id="clock-hint">Toque para começar</span>
+            </span>
+          </button>
+        </div>
+
+        <button class="restart glass" id="btn-restart" type="button">↺ Reiniciar</button>
+        <div class="result" id="result"></div>
+      </div>
+
+      <div class="board-large glass" id="board-large" hidden></div>
+    </section>
+
+    <button class="side-toggle glass" id="side-toggle" type="button" aria-controls="sidebar" aria-expanded="false">☰</button>
+
+    <aside class="sidebar glass" id="sidebar" aria-label="Informações da partida">
+      <div class="turn-card" id="turn-card"></div>
+      <button class="all-btn" id="btn-all" type="button" aria-pressed="false">
+        <span class="all-icon" aria-hidden="true">👥</span> Todos jogam
+      </button>
+      <ul class="team-list" id="team-list"></ul>
+      <div class="board-mini" id="board-mini" hidden></div>
+      <p class="last-log" id="last-log"></p>
+      <div class="side-actions">
+        <button class="side-btn" id="btn-settings" type="button"><span aria-hidden="true">⚙</span>Ajustes</button>
+        <button class="side-btn" id="btn-undo" type="button"><span aria-hidden="true">↶</span>Desfazer</button>
+        <button class="side-btn" id="btn-fullscreen" type="button"><span aria-hidden="true">⛶</span>Tela cheia</button>
+        <button class="side-btn" id="btn-menu" type="button"><span aria-hidden="true">☰</span>Menu</button>
+      </div>
+    </aside>
+
+    <div class="flash" id="flash" aria-hidden="true"></div>
+  </main>
+
+  <dialog id="settings-dialog">
+    <form method="dialog" class="stack">
+      <h2>Ajustes</h2>
+      <div class="setting-row">
+        <span>Tempo da rodada</span>
+        <div class="stepper">
+          <button type="button" class="icon-btn" data-step="-15" aria-label="Menos 15 segundos">−</button>
+          <output id="set-timer">60 s</output>
+          <button type="button" class="icon-btn" data-step="15" aria-label="Mais 15 segundos">+</button>
+        </div>
+      </div>
+      <label class="switch-field">
+        <input type="checkbox" id="set-dice">
+        <span class="switch" aria-hidden="true"></span>
+        <span>Dados virtuais</span>
+      </label>
+      <label class="switch-field">
+        <input type="checkbox" id="set-sound">
+        <span class="switch" aria-hidden="true"></span>
+        <span>Som (tique-taque e explosão)</span>
+      </label>
+      <div class="setting-row">
+        <span>Tabuleiro</span>
+        <div class="segmented" id="set-board">
+          <button type="button" data-value="off">Oculto</button>
+          <button type="button" data-value="small">Pequeno</button>
+          <button type="button" data-value="large">Grande</button>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span>Modo</span>
+        <div class="segmented" id="set-style">
+          <button type="button" data-value="desenho">Desenho</button>
+          <button type="button" data-value="mimica">Mímica</button>
+        </div>
+      </div>
+      <div class="stack">
+        <h3>Ajustar peões</h3>
+        <ul class="adjust-list" id="adjust-list"></ul>
+      </div>
+      <button class="btn btn-primary" value="close">Pronto</button>
+    </form>
+  </dialog>
+
+  <dialog id="menu-dialog">
+    <form method="dialog" class="stack">
+      <h2>Menu</h2>
+      <button class="btn" value="restart">Reiniciar com as mesmas equipes</button>
+      <button class="btn" value="setup">Mudar jogadores e equipes</button>
+      <a class="btn" href="../../">Voltar para a central</a>
+      <button class="btn btn-ghost" value="cancel">Fechar</button>
+    </form>
+  </dialog>
+
+  <dialog id="restart-dialog">
+    <form method="dialog" class="stack">
+      <h2>Quem acertou?</h2>
+      <p class="muted">Antes de reiniciar, marque o resultado desta rodada.</p>
+      <div class="stack" id="restart-options"></div>
+      <button class="btn" value="time">Só reiniciar o tempo</button>
+      <button class="btn btn-ghost" value="cancel">Cancelar</button>
+    </form>
+  </dialog>
+</body>
+</html>
