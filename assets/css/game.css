@@ -821,6 +821,11 @@ body.is-busy .game button {
   max-width: calc(100% - 20px);
 }
 
+/* Só a equipe que está jogando aparece ao lado do ☰. */
+#hud-teams .score-pill:not(.is-active) {
+  display: none;
+}
+
 @media (min-width: 700px) and (orientation: landscape) {
   .hud {
     --rail: 78px;
