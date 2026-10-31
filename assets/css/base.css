@@ -387,6 +387,78 @@ dialog::backdrop {
   }
 }
 
+/* Setup em tela larga (tablet deitado, computador): ocupa a largura toda e
+   cabe na altura, sem rolar a página. Card com muito conteúdo rola por dentro. */
+@media (min-width: 900px) and (orientation: landscape) {
+  body:has(#screen-setup:not([hidden])) .topbar,
+  .container:has(> #screen-setup:not([hidden])) {
+    max-width: none;
+  }
+
+  body:has(#screen-setup:not([hidden])) {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .container:has(> #screen-setup:not([hidden])) {
+    flex: 1;
+    min-height: 0;
+  }
+
+  #screen-setup:not([hidden]) {
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr);
+    grid-template-rows: minmax(0, 1fr) auto auto auto;
+    grid-template-areas:
+      "how players teams"
+      "opts players teams"
+      "err players teams"
+      "start players teams";
+    gap: 16px;
+  }
+
+  #screen-setup > .how {
+    grid-area: how;
+    overflow-y: auto;
+  }
+
+  #screen-setup > section.card:not(.how) {
+    grid-area: opts;
+    max-height: 45dvh;
+    overflow-y: auto;
+  }
+
+  #screen-setup > .start-row {
+    grid-area: start;
+    align-items: center;
+  }
+
+  #screen-setup > #setup-error {
+    grid-area: err;
+    margin: 0;
+  }
+
+  #screen-setup #teams-setup {
+    display: contents;
+  }
+
+  #teams-setup > :first-child {
+    grid-area: players;
+  }
+
+  #teams-setup > :last-child {
+    grid-area: teams;
+  }
+
+  #teams-setup > .card {
+    min-height: 0;
+    overflow-y: auto;
+    align-self: stretch;
+  }
+}
+
 .add-player input {
   flex: 1;
 }

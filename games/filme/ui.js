@@ -25,8 +25,11 @@ const shell = createShell({
   onEnterGame: () => render(store.state),
 });
 
+let pending = null; // filme tocado na lista, esperando confirmar o chute
+
 store.subscribe((s, action) => {
   if (!s) return;
+  pending = null;
   if (action.type === 'guess') (s.turn.result === 'hit' ? success : buzz)();
   if (action.type === 'clue') skip();
   if (action.type === 'giveUp') buzz();
@@ -75,8 +78,18 @@ function render(s) {
         .join('');
       const options = shownFilms(t)
         .sort(byTitle)
-        .map((i) => `<li><button class="film-opt" type="button" data-film="${i}">${esc(FILMES[i].titulo)}</button></li>`)
+        .map((i) => `<li><button class="film-opt" type="button" data-film="${i}" aria-pressed="${i === pending}">${esc(FILMES[i].titulo)}</button></li>`)
         .join('');
+      const confirm =
+        pending === null
+          ? ''
+          : `<div class="guess-confirm pop">
+              <p>Chutar <b>${esc(FILMES[pending].titulo)}</b>? Se errar, zera.</p>
+              <div class="duo">
+                <button class="neon-btn" type="button" data-act="cancel">Cancelar</button>
+                <button class="neon-btn is-ok" type="button" data-act="confirm">Confirmar · ${stagePoints(t.stage)} pts</button>
+              </div>
+            </div>`;
       const last = t.stage === STAGES - 1;
       play.innerHTML = `
         ${top}
@@ -92,6 +105,7 @@ function render(s) {
           <section class="guesses" aria-label="Lista de filmes">
             <p class="guesses-head">Qual é o filme? <span>${shownFilms(t).length} na lista · errou, zera</span></p>
             <ul class="film-list">${options}</ul>
+            ${confirm}
           </section>
         </div>`;
       return;
@@ -127,8 +141,20 @@ function render(s) {
 
 play.addEventListener('click', (e) => {
   const guess = e.target.closest('[data-film]');
-  if (guess) store.dispatch({ type: 'guess', film: Number(guess.dataset.film) });
+  if (guess) {
+    // Primeiro toque escolhe; o chute só vale depois de confirmar.
+    const film = Number(guess.dataset.film);
+    pending = pending === film ? null : film;
+    render(store.state);
+    shell.tips(store.state);
+    return;
+  }
   const act = e.target.closest('[data-act]')?.dataset.act;
+  if (act === 'confirm' && pending !== null) store.dispatch({ type: 'guess', film: pending });
+  if (act === 'cancel') {
+    pending = null;
+    render(store.state);
+  }
   if (['clue', 'giveUp', 'next'].includes(act)) store.dispatch({ type: act });
   if (act === 'restart') shell.restart();
   if (act === 'setup') shell.enterSetup();
