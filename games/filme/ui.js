@@ -10,6 +10,9 @@ const store = createStore({ key: 'filme:current', reduce });
 const play = $('#play');
 const screen = $('#screen-game');
 const byTitle = (a, b) => FILMES[a].titulo.localeCompare(FILMES[b].titulo, 'pt');
+// Busca sem acento e sem maiúscula: "pequena sereia" acha "A Pequena Sereia".
+const fold = (text) => text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+const matches = (i) => fold(FILMES[i].titulo).includes(fold(query.trim()));
 
 const shell = createShell({
   store,
@@ -22,14 +25,19 @@ const shell = createShell({
   writeOptions: (saved) => {
     $('#opt-per-team').value = String({ ...DEFAULT_SETTINGS, ...saved }.perTeam);
   },
-  onEnterGame: () => render(store.state),
+  onEnterGame: () => {
+    query = '';
+    render(store.state);
+  },
 });
 
 let pending = null; // filme tocado na lista, esperando confirmar o chute
+let query = ''; // texto da busca na lista; limpa a cada filme novo
 
 store.subscribe((s, action) => {
   if (!s) return;
   pending = null;
+  if (action.type === 'next') query = '';
   if (action.type === 'guess') (s.turn.result === 'hit' ? success : buzz)();
   if (action.type === 'clue') skip();
   if (action.type === 'giveUp') buzz();
@@ -78,7 +86,7 @@ function render(s) {
         .join('');
       const options = shownFilms(t)
         .sort(byTitle)
-        .map((i) => `<li><button class="film-opt" type="button" data-film="${i}" aria-pressed="${i === pending}">${esc(FILMES[i].titulo)}</button></li>`)
+        .map((i) => `<li data-film-item="${i}" ${matches(i) ? '' : 'hidden'}><button class="film-opt" type="button" data-film="${i}" aria-pressed="${i === pending}">${esc(FILMES[i].titulo)}</button></li>`)
         .join('');
       const confirm =
         pending === null
@@ -104,6 +112,8 @@ function render(s) {
           </div>
           <section class="guesses" aria-label="Lista de filmes">
             <p class="guesses-head">Qual é o filme? <span>${shownFilms(t).length} na lista · errou, zera</span></p>
+            <input class="film-search" type="search" placeholder="Buscar filme…" value="${esc(query)}" aria-label="Buscar filme" autocomplete="off">
+            <p class="film-none muted" ${shownFilms(t).some(matches) ? 'hidden' : ''}>Nenhum filme da lista com esse nome.</p>
             <ul class="film-list">${options}</ul>
             ${confirm}
           </section>
@@ -138,6 +148,18 @@ function render(s) {
       </div>
     </div>`;
 }
+
+// Filtra só escondendo itens, sem redesenhar: o campo não perde o foco.
+play.addEventListener('input', (e) => {
+  if (!e.target.matches('.film-search')) return;
+  query = e.target.value;
+  let any = false;
+  for (const li of play.querySelectorAll('[data-film-item]')) {
+    li.hidden = !matches(Number(li.dataset.filmItem));
+    any ||= !li.hidden;
+  }
+  play.querySelector('.film-none').hidden = any;
+});
 
 play.addEventListener('click', (e) => {
   const guess = e.target.closest('[data-film]');
