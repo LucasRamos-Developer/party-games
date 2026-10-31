@@ -1,0 +1,104 @@
+.stages {
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stages li {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  font: 800 1.1rem var(--font-display);
+}
+
+.stages li.is-past {
+  opacity: 0.35;
+  text-decoration: line-through;
+}
+
+.stages li.is-now {
+  border-color: #ffd23f;
+  color: #1a0f00;
+  background: #ffd23f;
+  box-shadow: 0 0 16px rgb(255 210 63 / 0.7);
+}
+
+.stage-stack {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.stage-stack .word-card {
+  flex: 1 0 auto;
+  min-height: 40%;
+}
+
+.stage-card.is-old {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgb(255 255 255 / 0.04);
+}
+
+.stage-card.is-old .clue {
+  font-size: 1rem;
+  text-shadow: none;
+  color: var(--ink-2);
+}
+
+.stage-card.is-old .frame {
+  max-height: 80px;
+}
+
+.stage-num {
+  flex: none;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.clue {
+  margin: 0;
+  font: 800 clamp(1.5rem, 4.6vw, 3rem) / 1.2 var(--font-display);
+  color: #fff;
+  text-shadow: 0 0 10px var(--clock);
+}
+
+.frame {
+  display: block;
+  max-width: 100%;
+  max-height: 46vh;
+  border-radius: 16px;
+  object-fit: contain;
+}
+
+.prize-now {
+  text-align: center;
+  color: var(--ink-2);
+  font-weight: 700;
+}
+
+.prize-now b {
+  font: 800 1.6rem var(--font-display);
+  color: #ffd23f;
+  text-shadow: 0 0 10px rgb(255 210 63 / 0.7);
+}
+
+.title-reveal.pop {
+  animation: card-pop 0.5s cubic-bezier(0.2, 1.5, 0.4, 1);
+}

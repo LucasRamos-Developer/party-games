@@ -1,0 +1,171 @@
+.mode-btn {
+  flex-direction: column;
+  gap: 2px;
+  min-height: 84px;
+}
+
+.mode-btn small {
+  font: 600 0.9rem var(--font);
+  text-shadow: none;
+  opacity: 0.85;
+}
+
+.name-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.name-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 4px 2px 14px;
+  border-radius: 999px;
+  border: 1px solid rgb(255 46 136 / 0.5);
+  background: rgb(255 46 136 / 0.1);
+  font-weight: 700;
+}
+
+.name-chip .icon-btn {
+  width: 30px;
+  height: 30px;
+  font-size: 1.1rem;
+}
+
+.add-player input {
+  flex: 1;
+}
+
+input[type="number"] {
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+
+#join-code {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font: 800 1.4rem var(--font-display);
+}
+
+.room-code {
+  text-align: center;
+  font: 800 clamp(3rem, 14vw, 5rem) / 1 var(--font-display);
+  letter-spacing: 0.15em;
+  color: #fff;
+  text-shadow: 0 0 12px #ff8a00, 0 0 40px #ff8a00;
+}
+
+.secret-card {
+  width: min(100%, 640px);
+}
+
+.secret-card.is-impostor {
+  --clock: #ff3b5c;
+}
+
+.secret-cat {
+  color: var(--ink-2);
+  font-weight: 700;
+}
+
+.secret-cat b {
+  color: #fff;
+}
+
+.q-kind {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--clock) 70%, #fff);
+}
+
+.handoff .clock-wrap,
+.phone-layout .clock-wrap {
+  flex: none;
+  width: 100%;
+  height: min(30vh, 260px);
+  min-height: 140px;
+}
+
+.vote-grid {
+  flex: 1;
+  align-content: center;
+}
+
+.reveal-line {
+  font-size: clamp(1.1rem, 3vw, 1.5rem);
+  text-align: center;
+}
+
+.reveal-line b {
+  color: #fff;
+  text-shadow: 0 0 10px var(--clock);
+}
+
+.phone-layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+.phone-layout > * {
+  width: 100%;
+}
+
+.hold-card {
+  appearance: none;
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 220px;
+  padding: 0;
+  border-radius: 28px;
+  border: 2px dashed rgb(255 46 136 / 0.6);
+  background: rgb(255 46 136 / 0.06);
+  color: var(--ink);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+}
+
+.hold-hint {
+  font: 800 1.3rem var(--font-display);
+  color: #ff9cc6;
+}
+
+.hold-secret {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: stretch;
+  visibility: hidden;
+}
+
+.hold-secret .word-card {
+  width: 100%;
+  height: 100%;
+}
+
+.hold-card.is-open .hold-secret {
+  visibility: visible;
+}
+
+.hold-card.is-open .hold-hint {
+  visibility: hidden;
+}

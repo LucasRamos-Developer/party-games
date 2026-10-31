@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Impostor</title>
+  <meta name="description" content="Todos recebem a mesma palavra, menos o impostor. Descubram quem é!">
+  <meta name="theme-color" content="#07060f">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%B2%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/game.css">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="ui.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="btn btn-ghost" href="../../">← Jogos</a>
+    <h1 class="brand">Impos<span>tor</span></h1>
+  </header>
+
+  <main class="container" id="screen-pre">
+    <section id="screen-home" class="narrow stack" hidden>
+      <section class="card stack how">
+        <h2>Como jogar</h2>
+        <ol>
+          <li>Todos recebem a mesma palavra secreta, menos o impostor (2 impostores com 7 ou mais jogadores).</li>
+          <li>O impostor só sabe a categoria. Na ordem, cada um diz <b>uma palavra</b> ligada à secreta.</li>
+          <li>Depois de conversar, todos votam em quem acham que é o impostor.</li>
+          <li>Pegou o impostor: +1 para cada um dos outros. Ele escapou: +2 para cada impostor.</li>
+        </ol>
+      </section>
+      <button class="neon-btn is-ok mode-btn" type="button" data-go="local">
+        <span>📱 Um aparelho</span><small>Passa de mão em mão</small>
+      </button>
+      <button class="neon-btn mode-btn" type="button" data-go="host">
+        <span>📡 Criar sala</span><small>Cada um no seu celular, sem internet entre eles</small>
+      </button>
+      <button class="neon-btn is-skip mode-btn" type="button" data-go="join">
+        <span>🔑 Entrar numa sala</span><small>Tenho o código de quem criou</small>
+      </button>
+      <button class="link-btn" type="button" id="btn-resume" hidden>Continuar a última partida</button>
+    </section>
+
+    <section id="screen-local-setup" class="narrow stack" hidden>
+      <section class="card stack">
+        <div class="row between"><h2>Jogadores</h2><span class="muted" id="player-count"></span></div>
+        <form class="row add-player" id="player-form">
+          <input type="text" id="player-name" placeholder="Nome do jogador" maxlength="20" autocomplete="off" aria-label="Nome do jogador">
+          <button class="btn btn-primary" type="submit">Adicionar</button>
+        </form>
+        <ul class="name-chips" id="player-list"></ul>
+      </section>
+      <section class="card stack">
+        <h2>Opções</h2>
+        <label class="field">
+          <span>Tempo de conversa</span>
+          <select id="opt-discuss">
+            <option value="60">1 minuto</option>
+            <option value="120">2 minutos</option>
+            <option value="180" selected>3 minutos</option>
+            <option value="300">5 minutos</option>
+          </select>
+        </label>
+      </section>
+      <p class="error" id="local-error" role="alert"></p>
+      <div class="row wrap">
+        <button class="btn btn-primary btn-lg" id="btn-local-start" type="button">Começar</button>
+        <button class="btn btn-ghost" type="button" data-go="home">Voltar</button>
+      </div>
+    </section>
+
+    <section id="screen-host" class="narrow stack" hidden>
+      <section class="card stack">
+        <h2>Criar sala</h2>
+        <label class="field">
+          <span>Quantos jogadores (contando você)?</span>
+          <input type="number" id="host-n" min="3" max="15" value="5" inputmode="numeric">
+        </label>
+        <button class="btn btn-primary btn-lg" id="btn-host-create" type="button">Gerar código</button>
+      </section>
+      <section class="card stack" id="host-code-box" hidden>
+        <p class="muted">Nos outros celulares: abrir este jogo → <b>Entrar numa sala</b> → digitar:</p>
+        <p class="room-code" id="host-code"></p>
+        <p class="muted" id="host-info"></p>
+        <p class="muted">Cada pessoa escolhe um número diferente. Você é o <b>jogador 1</b>.</p>
+        <button class="btn btn-primary btn-lg" id="btn-host-go" type="button">Ver minha carta</button>
+      </section>
+      <button class="btn btn-ghost" type="button" data-go="home">Voltar</button>
+    </section>
+
+    <section id="screen-join" class="narrow stack" hidden>
+      <section class="card stack">
+        <h2>Entrar numa sala</h2>
+        <label class="field">
+          <span>Código da sala</span>
+          <input type="text" id="join-code" maxlength="8" autocomplete="off" autocapitalize="characters" placeholder="Ex.: GK7QP">
+        </label>
+        <label class="field">
+          <span>Quantos jogadores no total?</span>
+          <input type="number" id="join-n" min="3" max="15" value="5" inputmode="numeric">
+        </label>
+        <label class="field">
+          <span>Seu número</span>
+          <input type="number" id="join-me" min="1" max="15" value="2" inputmode="numeric">
+        </label>
+        <p class="error" id="join-error" role="alert"></p>
+        <button class="btn btn-primary btn-lg" id="btn-join-go" type="button">Entrar</button>
+      </section>
+      <button class="btn btn-ghost" type="button" data-go="home">Voltar</button>
+    </section>
+  </main>
+
+  <main id="screen-game" class="game" hidden>
+    <header class="hud glass">
+      <ul class="hud-teams" id="hud-info"></ul>
+      <button class="hud-btn" id="btn-undo" type="button" title="Desfazer" aria-label="Desfazer">↶</button>
+      <button class="hud-btn" id="btn-fullscreen" type="button" title="Tela cheia" aria-label="Tela cheia">⛶</button>
+      <button class="hud-btn" id="btn-menu" type="button" title="Menu" aria-label="Menu">☰</button>
+    </header>
+    <section class="play-area" id="play" aria-live="polite"></section>
+    <div class="flash" aria-hidden="true"></div>
+  </main>
+
+  <dialog id="menu-dialog">
+    <form method="dialog" class="stack">
+      <h2>Menu</h2>
+      <button class="btn" value="home">Novo jogo</button>
+      <a class="btn" href="../../">Voltar para a central</a>
+      <button class="btn btn-ghost" value="cancel">Fechar</button>
+    </form>
+  </dialog>
+
+  <dialog id="reveal-dialog">
+    <form method="dialog" class="stack">
+      <h2>Revelar o impostor?</h2>
+      <p class="muted">Façam a votação em voz alta antes de revelar.</p>
+      <button class="btn btn-primary" value="yes">Revelar</button>
+      <button class="btn btn-ghost" value="cancel">Ainda não</button>
+    </form>
+  </dialog>
+</body>
+</html>
