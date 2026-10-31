@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Quantas Palavras?</title>
+  <meta name="description" content="Leilão de respostas: quantos itens sua equipe consegue falar?">
+  <meta name="theme-color" content="#07060f">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%B2%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/game.css">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="ui.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="btn btn-ghost" href="../../">← Jogos</a>
+    <h1 class="brand">Quantas <span>Palavras</span>?</h1>
+  </header>
+
+  <main class="container" id="screen-pre">
+    <section id="screen-loading" class="muted">Carregando…</section>
+
+    <section id="screen-resume" class="narrow stack" hidden>
+      <div class="card stack">
+        <h2>Partida em andamento</h2>
+        <ul class="resume-list" id="resume-list"></ul>
+        <div class="row wrap">
+          <button class="btn btn-primary btn-lg" id="btn-continue" type="button">Continuar partida</button>
+          <button class="btn btn-lg" id="btn-new" type="button">Nova partida</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-setup" class="stack" hidden>
+      <section class="card stack how">
+        <h2>Como jogar</h2>
+        <ol>
+          <li>O app sorteia um confronto: um jogador de cada uma das duas equipes.</li>
+          <li>Aparece uma pergunta, como <i>Frutas</i> ou <i>Países que começam com B</i>.</li>
+          <li><b>Leilão:</b> as equipes se alternam dando lances (“meu jogador fala 6!”). Cada vez tem um tempo; se ele acabar, quem estava decidindo responde. Quem passar deixa o último lance para o adversário.</li>
+          <li>Quem ganhou o leilão tem o tempo do relógio para falar a quantidade prometida. O outro time confere.</li>
+          <li>Cumpriu a meta: +1 ponto. Não cumpriu: +1 para o adversário. Quando todos tiverem jogado, vence quem tiver mais pontos.</li>
+        </ol>
+      </section>
+      <div id="teams-setup" class="setup-grid"></div>
+      <section class="card stack">
+        <h2>Opções</h2>
+        <div class="options-grid">
+          <label class="field">
+            <span>Quem faz o leilão</span>
+            <select id="opt-mode"><option value="team" selected>O time (o sorteado responde)</option><option value="pair">Os sorteados (o time responde)</option></select>
+          </label>
+          <label class="field">
+            <span>Sorteio do confronto</span>
+            <select id="opt-draw"><option value="random" selected>Aleatório</option><option value="manual">Escolher os jogadores</option></select>
+          </label>
+          <label class="field">
+            <span>Nível das perguntas</span>
+            <select id="opt-level"><option value="facil">Fácil (todas as idades)</option><option value="misto" selected>Misto</option><option value="desafio">Desafio</option></select>
+          </label>
+          <label class="field">
+            <span>Tempo para responder</span>
+            <select id="opt-timer"><option value="60">1 minuto</option><option value="90" selected>1 min 30 s</option><option value="120">2 minutos</option></select>
+          </label>
+          <label class="field">
+            <span>Tempo de cada lance</span>
+            <select id="opt-bid"><option value="15">15 segundos</option><option value="30">30 segundos</option><option value="45" selected>45 segundos</option><option value="60">1 minuto</option></select>
+          </label>
+        </div>
+      </section>
+      <p class="error" id="setup-error" role="alert"></p>
+      <button class="btn btn-primary btn-lg" id="btn-start" type="button">Começar partida</button>
+    </section>
+  </main>
+
+  <main id="screen-game" class="game" hidden>
+    <header class="hud glass">
+      <ul class="hud-teams" id="hud-teams"></ul>
+      <button class="hud-btn" id="btn-undo" type="button" title="Desfazer" aria-label="Desfazer">↶</button>
+      <button class="hud-btn" id="btn-fullscreen" type="button" title="Tela cheia" aria-label="Tela cheia">⛶</button>
+      <button class="hud-btn" id="btn-menu" type="button" title="Menu" aria-label="Menu">☰</button>
+    </header>
+    <section class="play-area" id="play" aria-live="polite"></section>
+    <div class="flash" aria-hidden="true"></div>
+  </main>
+
+  <dialog id="menu-dialog">
+    <form method="dialog" class="stack">
+      <h2>Menu</h2>
+      <button class="btn" value="restart">Reiniciar com as mesmas equipes</button>
+      <button class="btn" value="setup">Mudar jogadores e equipes</button>
+      <a class="btn" href="../../">Voltar para a central</a>
+      <button class="btn btn-ghost" value="cancel">Fechar</button>
+    </form>
+  </dialog>
+</body>
+</html>

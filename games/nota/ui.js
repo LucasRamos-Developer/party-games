@@ -4,6 +4,7 @@ import { randomInt } from '../../assets/js/core/dice.js';
 import { buzz, success } from '../../assets/js/core/sound.js';
 import { $, esc } from '../../assets/js/core/dom.js';
 import { THEMES, question } from './words.js';
+import { TIPS } from './tips.js';
 import { BASE_QUESTIONS, DEFAULT_SETTINGS, EXTRA_COST, MIN_PRIZE, holderOf, newGame, reduce } from './state.js';
 
 const store = createStore({ key: 'nota:current', reduce });
@@ -16,6 +17,14 @@ let peek = false; // a nota está visível para quem segura?
 const shell = createShell({
   store,
   settingsKey: 'nota:setup',
+  tips: TIPS,
+  tipKey: (s) => {
+    if (s.phase === 'secret') return peek ? 'peek' : 'secret';
+    const t = s.turn;
+    if (s.phase === 'questions' && t.idx === t.cards.length - 1 && t.cards.length >= BASE_QUESTIONS) return 'extra';
+    return s.phase;
+  },
+  practiceDone: (action) => action.type === 'next',
   newGame: ({ teams, settings }) => newGame({ teams, settings, nota: randomNota() }),
   readOptions: () => ({ rounds: Number($('#opt-rounds').value) }),
   writeOptions: (saved) => {
@@ -158,6 +167,7 @@ play.addEventListener('click', (e) => {
     case 'peek':
       peek = true;
       render(store.state);
+      shell.tips(store.state);
       break;
     case 'known':
       peek = false;

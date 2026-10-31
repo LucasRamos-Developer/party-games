@@ -14,6 +14,9 @@ continua na mesa (cartas, papel e caneta).
 | **Impostor** | `games/impostor/` | Todos têm a mesma palavra, menos o impostor. Um aparelho passando de mão em mão, ou **cada um no seu celular** com código de sala (sorteio com semente, sem servidor). |
 | **Qual é a Nota?** | `games/nota/` | Quem segura o tablet sabe uma nota de 0 a 10; 2 perguntas sorteadas + 2 livres. Acertar em cheio vale 10; cada pergunta extra desconta (−1 sorteada, −2 livre, mínimo 2). |
 | **Que Filme É Esse?** | `games/filme/` | 5 pistas do mais difícil ao mais fácil (10, 8, 6, 4, 2 pontos). Aceita imagens próprias em `games/filme/frames/`. |
+| **Quantas Palavras?** | `games/quantas/` | Leilão de respostas: um jogador de cada equipe; lances alternados com tempo por vez (se acabar, quem estava decidindo responde); quem ganha tem 1min30 para falar a quantidade prometida. Modo invertido, sorteio aleatório ou escolhido, nível Fácil/Misto/Desafio. |
+
+Todos os jogos têm **Como jogar** (no setup e no menu) e uma **rodada de treino**: uma rodada que não vale ponto, com balões explicando cada botão na hora (`assets/js/core/coach.js` e `practice.js`).
 
 ## Rodar localmente
 
@@ -51,6 +54,7 @@ assets/js/core/
   sound.js                  sons sintetizados (WebAudio)
   random.js, deck.js        sorteio com semente e baralho sem repetição
   turns.js                  fila de vezes e desempate
+  coach.js, practice.js     balões guiados e rodada de treino
   dice.js, dom.js           dado animado e helpers de DOM
 games/<jogo>/
   state.js                  regras (funções puras)

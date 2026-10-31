@@ -15,43 +15,24 @@
   position: relative;
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(0, 1fr) minmax(96px, 34%);
+  gap: 12px;
+  padding: 12px;
   overflow: hidden;
 }
 
-.zone {
-  display: flex;
-  align-items: flex-end;
-  padding: 18px 24px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.zone span {
-  font: 800 1rem var(--font);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  opacity: 0.45;
-}
-
-.zone-pass {
-  color: #ffb35c;
-}
-
-.zone-hit {
-  justify-content: flex-end;
-  color: #2bff88;
+.forehead-top {
+  position: relative;
+  min-height: 0;
+  display: grid;
+  place-items: center;
 }
 
 .forehead-word {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 24px 48px;
+  padding: 0 clamp(80px, 16vmin, 150px);
   pointer-events: none;
   text-align: center;
-  font: 800 clamp(3rem, 13vmin, 9rem) / 1 var(--font-display);
+  font: 800 clamp(3rem, 18vmin, 9rem) / 1 var(--font-display);
   color: #fff;
   text-shadow: 0 0 14px var(--clock), 0 0 48px var(--clock);
   overflow-wrap: anywhere;
@@ -63,23 +44,64 @@
 
 .forehead .clock-wrap {
   position: absolute;
-  top: 14px;
-  left: 50%;
-  translate: -50% 0;
-  width: clamp(90px, 18vmin, 140px);
-  height: clamp(90px, 18vmin, 140px);
+  top: 0;
+  left: 0;
+  width: clamp(80px, 16vmin, 130px);
+  height: clamp(80px, 16vmin, 130px);
   min-height: 0;
   z-index: 2;
 }
 
 .forehead-count {
   position: absolute;
-  top: 18px;
-  right: 22px;
-  font: 800 1.6rem var(--font-display);
+  top: 6px;
+  right: 10px;
+  font: 800 1.8rem var(--font-display);
   color: #2bff88;
   text-shadow: 0 0 10px #2bff88;
   pointer-events: none;
+}
+
+.forehead-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  min-height: 0;
+}
+
+/* Botões grandes e claros: dá para tocar sem mirar. */
+.big-answer {
+  --c: #2bff88;
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 0;
+  border-radius: 24px;
+  border: 3px solid var(--c);
+  background: color-mix(in srgb, var(--c) 18%, rgb(0 0 0 / 0.3));
+  color: var(--c);
+  font: 800 clamp(1.6rem, 6vmin, 3.2rem) var(--font-display);
+  text-transform: uppercase;
+  text-shadow: 0 0 10px var(--c);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--c) 45%, transparent), inset 0 0 24px color-mix(in srgb, var(--c) 20%, transparent);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.08s ease;
+}
+
+.big-answer span {
+  font-size: 1.25em;
+}
+
+.big-answer:active {
+  transform: scale(0.97);
+  background: color-mix(in srgb, var(--c) 35%, rgb(0 0 0 / 0.3));
+}
+
+.big-answer.is-pass {
+  --c: #ff8a00;
 }
 
 .forehead::after {

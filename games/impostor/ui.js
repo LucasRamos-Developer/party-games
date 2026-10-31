@@ -5,6 +5,9 @@ import { boom, mountClock } from '../../assets/js/core/clock.js';
 import { roomCode } from '../../assets/js/core/random.js';
 import { $, esc } from '../../assets/js/core/dom.js';
 import { MAX_PLAYERS, MIN_PLAYERS, impostorCount, newGame, reduce, roundInfo } from './state.js';
+import { TIPS } from './tips.js';
+import { createPractice } from '../../assets/js/core/practice.js';
+import { mountHowTo } from '../../assets/js/core/shell.js';
 
 const PHONE_KEY = 'impostor:phone';
 const LAST_KEY = 'impostor:last';
@@ -29,6 +32,22 @@ const timer = createTimer({
   onTick: (r, t) => clock.update(r, t, { running: timer?.running ?? false }),
   onEnd: () => boom(screen),
 });
+
+let resumeAfterTips = false;
+const practice = createPractice({
+  tips: TIPS,
+  tipKey: (s) => (s.phase === 'pass' && showing ? 'card' : s.phase),
+  isDone: (action) => action.type === 'nextRound',
+  onReal: () => startLocal(false),
+  onAgain: () => startLocal(true),
+  onShow: (on) => {
+    if (on) {
+      resumeAfterTips = timer.running;
+      timer.pause();
+    } else if (resumeAfterTips) timer.start();
+  },
+});
+mountHowTo($('#menu-dialog'));
 
 // ---------- navegação ----------
 
@@ -88,8 +107,11 @@ function enterPhone(session) {
 // ---------- render ----------
 
 function render() {
-  if (mode === 'local') renderLocal(store.state);
-  else renderPhone();
+  $('#practice-badge').hidden = !(mode === 'local' && store.state?.practice);
+  if (mode === 'local') {
+    renderLocal(store.state);
+    practice.after(store.state);
+  } else renderPhone();
 }
 
 function cardHtml(info, isImpostor) {
@@ -206,8 +228,10 @@ function renderPhone() {
 
 // ---------- eventos ----------
 
-store.subscribe(() => {
-  if (mode === 'local' && !screen.hidden) render();
+store.subscribe((s, action, prev) => {
+  if (mode !== 'local' || screen.hidden) return;
+  render();
+  practice.check(action, s, prev);
 });
 
 document.addEventListener('click', (e) => {
@@ -249,14 +273,20 @@ $('#player-list').addEventListener('click', (e) => {
   renderNames();
 });
 
-$('#btn-local-start').addEventListener('click', () => {
+function startLocal(isPractice) {
   if (names.length < MIN_PLAYERS) {
     $('#local-error').textContent = `Adicione pelo menos ${MIN_PLAYERS} jogadores.`;
     return;
   }
-  store.start(newGame({ players: names, discuss: Number($('#opt-discuss').value), code: roomCode() }));
+  practice.reset();
+  const state = newGame({ players: names, discuss: Number($('#opt-discuss').value), code: roomCode() });
+  if (isPractice) state.practice = true;
+  store.start(state);
   enterLocal();
-});
+}
+
+$('#btn-local-start').addEventListener('click', () => startLocal(false));
+$('#btn-local-practice').addEventListener('click', () => startLocal(true));
 
 let hostCode = null;
 $('#btn-host-create').addEventListener('click', () => {

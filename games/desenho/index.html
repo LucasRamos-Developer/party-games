@@ -36,6 +36,15 @@
     </section>
 
     <section id="screen-setup" class="stack" hidden>
+      <section class="card stack how">
+        <h2>Como jogar</h2>
+        <ol>
+          <li>As equipes se revezam: um jogador pega uma carta e desenha (ou faz mímica) para a própria equipe adivinhar.</li>
+          <li>A casa do peão diz a rodada: casa comum = só a equipe da vez; casa laranja = <b>todos jogam</b>.</li>
+          <li>Toque no relógio para começar. Acertou: rola o dado e anda. Errou: a vez passa.</li>
+          <li>Quem chegar ao Fim e acertar primeiro numa rodada de todos jogam vence.</li>
+        </ol>
+      </section>
       <div id="teams-setup" class="setup-grid"></div>
       <section class="card stack">
         <h2>Opções</h2>
@@ -82,7 +91,10 @@
         </div>
       </section>
       <p class="error" id="setup-error" role="alert"></p>
-      <button class="btn btn-primary btn-lg" id="btn-start" type="button">Começar partida</button>
+      <div class="start-row">
+        <button class="btn btn-primary btn-lg" id="btn-start" type="button">Começar partida</button>
+        <button class="btn btn-lg" id="btn-practice" type="button">🎓 Rodada de treino</button>
+      </div>
     </section>
   </main>
 
@@ -109,6 +121,7 @@
     <button class="side-toggle glass" id="side-toggle" type="button" aria-controls="sidebar" aria-expanded="false">☰</button>
 
     <aside class="sidebar glass" id="sidebar" aria-label="Informações da partida">
+      <span class="practice-badge" id="practice-badge" hidden>🎓 Treino</span>
       <div class="turn-card" id="turn-card"></div>
       <button class="all-btn" id="btn-all" type="button" aria-pressed="false">
         <span class="all-icon" aria-hidden="true">👥</span> Todos jogam

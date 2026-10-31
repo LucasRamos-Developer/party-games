@@ -4,6 +4,7 @@ import { buzz, skip, success } from '../../assets/js/core/sound.js';
 import { $, esc } from '../../assets/js/core/dom.js';
 import { FILMES } from './filmes.js';
 import { DEFAULT_SETTINGS, STAGES, newGame, reduce, stagePoints } from './state.js';
+import { TIPS } from './tips.js';
 
 const store = createStore({ key: 'filme:current', reduce });
 const play = $('#play');
@@ -12,6 +13,8 @@ const screen = $('#screen-game');
 const shell = createShell({
   store,
   settingsKey: 'filme:setup',
+  tips: TIPS,
+  practiceDone: (action) => action.type === 'next',
   minPerTeam: 1,
   newGame: ({ teams, settings }) => newGame({ teams, settings }),
   readOptions: () => ({ perTeam: Number($('#opt-per-team').value) }),

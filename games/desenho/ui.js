@@ -15,6 +15,9 @@ import {
   roundTypeFor,
 } from './state.js';
 import { createBoardView } from './board.js';
+import { TIPS } from './tips.js';
+import { createPractice } from '../../assets/js/core/practice.js';
+import { mountHowTo } from '../../assets/js/core/shell.js';
 
 const SAVE_KEY = 'desenho:current';
 const SETUP_KEY = 'desenho:setup';
@@ -38,6 +41,23 @@ let resultKey = null;
 let selectedRound = null;
 let bigDie = null;
 const selected = new Set();
+
+let resumeAfterTips = false;
+const practice = createPractice({
+  tips: TIPS,
+  tipKey: (s) => (s.phase === 'drawing' ? (s.round.type === 'normal' ? 'drawing' : 'drawingAll') : s.phase),
+  // O treino acaba quando a primeira rodada termina (o peão andou ou a vez passou).
+  isDone: (action, s) => action.type === 'move' || (action.type === 'result' && s.phase === 'ready'),
+  onReal: () => restartSameTeams(),
+  onAgain: () => restartSameTeams({ practice: true }),
+  onShow: (on) => {
+    if (on) {
+      resumeAfterTips = timer.running;
+      timer.pause();
+    } else if (resumeAfterTips) timer.start();
+  },
+});
+mountHowTo($('#menu-dialog'));
 
 const boards = { small: createBoardView($('#board-mini')), large: createBoardView($('#board-large')) };
 const timer = createTimer({ onTick: updateClock, onEnd: () => boomFx($('#screen-game')) });
@@ -107,6 +127,7 @@ async function dispatch(action) {
     setBusy(false);
   }
   render();
+  practice.check(action, next, prev);
 }
 
 // Ajustes não entram no histórico do desfazer.
@@ -170,6 +191,8 @@ function render() {
   renderSidebar(s);
   updateClock(timer.remaining, timer.total);
   $('#btn-undo').disabled = busy || !game.history.length;
+  $('#practice-badge').hidden = !s.practice;
+  practice.after(s);
 }
 
 function renderWho(s) {
@@ -391,17 +414,20 @@ async function enterSetup() {
   showPre('setup');
 }
 
-function startGame(teams, gameSettings) {
+function startGame(teams, gameSettings, { practice: isPractice = false } = {}) {
+  practice.reset();
   game = { state: newGame({ teams, settings: gameSettings }), history: [] };
+  if (isPractice) game.state.practice = true;
   save();
   enterGame();
 }
 
-function restartSameTeams() {
+function restartSameTeams(opts) {
   const s = game.state;
   startGame(
     s.teams.map(({ name, color, players }) => ({ name, color, players })),
     s.settings,
+    opts,
   );
 }
 
@@ -565,7 +591,10 @@ fsButton.addEventListener('click', () => {
 $('#btn-continue').addEventListener('click', enterGame);
 $('#btn-new').addEventListener('click', enterSetup);
 
-$('#btn-start').addEventListener('click', async () => {
+$('#btn-start').addEventListener('click', () => startFromSetup());
+$('#btn-practice').addEventListener('click', () => startFromSetup({ practice: true }));
+
+async function startFromSetup(opts) {
   const result = setup.getResult();
   if (!result.ok) {
     $('#setup-error').textContent = result.error;
@@ -579,8 +608,8 @@ $('#btn-start').addEventListener('click', async () => {
     virtualDice: $('#opt-dice').checked,
   };
   await Promise.all([storage.save(PLAYERS_KEY, result.snapshot), storage.save(SETUP_KEY, { settings: gameSettings })]);
-  startGame(result.teams, gameSettings);
-});
+  startGame(result.teams, gameSettings, opts);
+}
 
 // ---------- início ----------
 

@@ -6,6 +6,7 @@ import { beep, skip, success } from '../../assets/js/core/sound.js';
 import { $, esc } from '../../assets/js/core/dom.js';
 import { CATEGORIES } from './words.js';
 import { DEFAULT_SETTINGS, holderOf, newGame, reduce, turnHits } from './state.js';
+import { TIPS } from './tips.js';
 
 const store = createStore({ key: 'testa:current', reduce });
 const play = $('#play');
@@ -18,6 +19,7 @@ const timer = createTimer({ onTick: (r, t) => clock.update(r, t, { running: time
 
 let viewKey = null;
 let countdown = false;
+let resumeAfterTips = false;
 let feedbackUntil = 0;
 
 $('#opt-categories').innerHTML = CATEGORIES.map(
@@ -27,6 +29,14 @@ $('#opt-categories').innerHTML = CATEGORIES.map(
 const shell = createShell({
   store,
   settingsKey: 'testa:setup',
+  tips: TIPS,
+  practiceDone: (action) => action.type === 'confirm',
+  onTips: (on) => {
+    if (on) {
+      resumeAfterTips = timer.running;
+      timer.pause();
+    } else if (resumeAfterTips) timer.start();
+  },
   newGame: ({ teams, settings }) => newGame({ teams, settings }),
   readOptions: () => ({
     timer: Number($('#opt-timer').value),
@@ -38,7 +48,7 @@ const shell = createShell({
     const st = { ...DEFAULT_SETTINGS, ...saved };
     $('#opt-timer').value = String(st.timer);
     $('#opt-rounds').value = String(st.rounds);
-    $('#opt-control').value = st.control;
+    $('#opt-control').value = st.control === 'tilt' ? 'tilt' : 'buttons';
     document.querySelectorAll('#opt-categories input').forEach((i) => (i.checked = st.categories.includes(i.value)));
   },
   onEnterGame: () => {
@@ -77,11 +87,8 @@ function render(s) {
         <p class="who-kicker">${esc(team.name)} · quem segura</p>
         <h2 class="who-title">${esc(holderOf(team))}</h2>
         <p class="result-hint">
-          ${
-            tilt
-              ? 'Segure o aparelho na testa, tela virada para a equipe. <b>Inclinar para baixo</b> = acertou · <b>para cima</b> = passa.'
-              : 'Segure o aparelho na testa, tela virada para a equipe. Toque à <b>direita</b> = acertou · à <b>esquerda</b> = passa.'
-          }
+          Segure o aparelho na testa, tela virada para a equipe.
+          ${tilt ? 'Incline <b>para baixo</b> = acertou · <b>para cima</b> = passou, ou use os botões.' : 'Use os botões grandes: <b>✓ Acertou</b> e <b>✗ Passou</b>.'}
         </p>
         <button class="neon-btn is-ok big-cta" type="button" data-act="ready">Pronto!</button>
       </div>`;
@@ -92,11 +99,15 @@ function render(s) {
     if (fresh) {
       play.innerHTML = `
         <div class="forehead" id="forehead">
-          <div class="zone zone-pass" data-zone="pass"><span>↑ Passa</span></div>
-          <div class="zone zone-hit" data-zone="hit"><span>Acertou ↓</span></div>
-          <div class="forehead-word" id="word"></div>
-          <div class="forehead-clock" data-slot="clock"></div>
-          <div class="forehead-count" id="count"></div>
+          <div class="forehead-top">
+            <div class="forehead-clock" data-slot="clock"></div>
+            <div class="forehead-word" id="word"></div>
+            <div class="forehead-count" id="count"></div>
+          </div>
+          <div class="forehead-buttons">
+            <button class="big-answer is-pass" type="button" data-zone="pass"><span aria-hidden="true">✗</span> Passou</button>
+            <button class="big-answer is-hit" type="button" data-zone="hit"><span aria-hidden="true">✓</span> Acertou</button>
+          </div>
         </div>`;
       play.querySelector('[data-slot="clock"]').replaceWith(clockBox);
     }

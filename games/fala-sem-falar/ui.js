@@ -6,6 +6,7 @@ import { buzz, skip, success } from '../../assets/js/core/sound.js';
 import { $, esc } from '../../assets/js/core/dom.js';
 import { CARDS } from './words.js';
 import { DEFAULT_SETTINGS, explainerOf, newGame, points, reduce, turnTotal } from './state.js';
+import { TIPS } from './tips.js';
 
 const store = createStore({ key: 'fala:current', reduce });
 const play = $('#play');
@@ -17,10 +18,22 @@ const timer = createTimer({ onTick: updateClock, onEnd: onTimeUp });
 
 const LABEL = { hit: ['✓ Acertou', '#2bff88'], skip: ['↷ Pulou', '#ff8a00'], taboo: ['✗ Proibida', '#ff3b5c'] };
 let viewKey = null;
+let coaching = false; // balões do treino abertos: timer pausado sem borrar a carta
+let resumeAfterTips = false;
 
 const shell = createShell({
   store,
   settingsKey: 'fala:setup',
+  tips: TIPS,
+  practiceDone: (action) => action.type === 'confirm',
+  onTips: (on) => {
+    coaching = on;
+    if (on) {
+      resumeAfterTips = timer.running;
+      timer.pause();
+    } else if (resumeAfterTips) timer.start();
+    updateClock(timer.remaining, timer.total);
+  },
   newGame: ({ teams, settings }) => newGame({ teams, settings }),
   readOptions: () => ({
     timer: Number($('#opt-timer').value),
@@ -163,7 +176,7 @@ function updateClock(remaining, total) {
   const s = store.state;
   const ready = s?.phase === 'ready';
   clock.update(remaining, total, { running: timer?.running ?? false, hint: ready ? 'Toque para começar' : undefined });
-  play.classList.toggle('is-paused', s?.phase === 'playing' && !(timer?.running ?? false) && remaining > 0);
+  play.classList.toggle('is-paused', !coaching && s?.phase === 'playing' && !(timer?.running ?? false) && remaining > 0);
 }
 
 function onClockTap() {
