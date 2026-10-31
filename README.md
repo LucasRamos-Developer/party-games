@@ -15,6 +15,7 @@ continua na mesa (cartas, papel e caneta).
 | **Qual é a Nota?** | `games/nota/` | Quem segura o tablet vê a nota de 0 a 10 e a esconde; 2 perguntas sorteadas + 2 livres, intercaladas em ordem sorteada. Acertar em cheio vale 10; cada pergunta extra desconta (−1 sorteada, −2 livre, mínimo 2). |
 | **Que Filme É Esse?** | `games/filme/` | 50 filmes; 5 pistas do mais difícil ao mais fácil (10, 8, 6, 4, 2 pontos). O chute é tocando na lista ao lado, que encolhe a cada pista (50 → 10) mantendo os filmes mais parecidos; errou, zera. Aceita imagens próprias em `games/filme/frames/`. |
 | **Quantas Palavras?** | `games/quantas/` | Leilão de respostas: um jogador de cada equipe; um lado da tela por equipe, lances sugeridos (próximo número e de 5 em 5) + seletor −/+, um relógio por equipe que só corre na vez dela (zerou, responde); "Duvido!" obriga o adversário a cumprir o lance; quem ganha tem 1min30 para falar a quantidade prometida. Modo invertido, sorteio aleatório ou escolhido, nível Fácil/Misto/Desafio. |
+| **Tela de Espera** | `games/espera/` | Para deixar na TV enquanto o pessoal chega. A mensagem se escreve direto na tela; os jogadores cadastrados e os convidados (adicionados no menu) viram monstros no cemitério. Tema Halloween: lanterna que segue o mouse, lampião que acende a luz, morcegos que fogem, janelas, aranha, abóbora e raio na lua. |
 
 Todos os jogos têm **Como jogar** (no setup e no menu) e uma **rodada de treino**: uma rodada que não vale ponto, com balões explicando cada botão na hora (`assets/js/core/coach.js` e `practice.js`).
 
@@ -57,6 +58,8 @@ assets/js/core/
   turns.js                  fila de vezes e desempate
   coach.js, practice.js     balões guiados e rodada de treino
   dice.js, dom.js           dado animado e helpers de DOM
+  lobby.js                  tela de espera: mensagem, convidados, menu e ponteiro
+assets/js/lobby-themes/     temas da tela de espera (cena animada de cada tema)
 games/<jogo>/
   state.js                  regras (funções puras)
   ui.js                     liga estado, tela e eventos
@@ -76,3 +79,11 @@ storage`. O estado da partida já é um objeto JSON serializável.
 1. Copie a estrutura de um jogo em equipes (ex.: `games/filme/`): `index.html` com `base.css` + `game.css`, `state.js` com `reduce(state, action)` puro e `ui.js` usando `createStore` + `createShell`.
 2. Reaproveite os módulos de `assets/js/core/`.
 3. Adicione um card em `index.html`.
+
+## Adicionar um tema na tela de espera
+
+1. Crie `assets/js/lobby-themes/<id>.js` (+ `<id>.css`) seguindo o contrato
+   descrito no topo de `halloween.js`: `export default { css, mount(stage, ctx) }`,
+   e `mount` devolve `{ setLight, callAll, layout, destroy }`.
+2. Acrescente uma linha em `assets/js/lobby-themes/index.js`. O tema aparece no
+   menu da tela de espera e também pode ser aberto direto com `?tema=<id>`.

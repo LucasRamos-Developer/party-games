@@ -810,3 +810,7 @@ a.game-card:hover {
   outline: 3px solid var(--violet);
   outline-offset: 2px;
 }
+
+.game-card .art-espera {
+  background: radial-gradient(120% 90% at 50% 100%, #5e1e06, #13060f 70%);
+}

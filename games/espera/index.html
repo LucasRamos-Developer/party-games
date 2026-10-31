@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tela de Espera</title>
+  <meta name="description" content="Tela de espera animada, com a mensagem que você escrever e os convidados virando personagens.">
+  <meta name="theme-color" content="#07060f">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%B2%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/lobby.css">
+  <link rel="stylesheet" id="theme-css">
+  <script type="module" src="../../assets/js/core/lobby.js"></script>
+</head>
+<body class="lobby">
+  <main class="lobby-stage" id="stage" aria-label="Cena animada: toque nas coisas para ver o que acontece"></main>
+
+  <div class="lobby-top">
+    <div class="lobby-message" id="message" spellcheck="false" role="textbox" aria-label="Mensagem da tela de espera" data-placeholder="Toque para escrever uma mensagem"></div>
+    <p class="lobby-hint" id="hint" hidden>Adicione os convidados no menu ☰ (ou cadastre jogadores num jogo) para eles virarem personagens.</p>
+  </div>
+
+  <button class="lobby-menu-btn" id="btn-menu" type="button" title="Menu" aria-label="Menu">☰</button>
+
+  <dialog id="menu-dialog">
+    <form method="dialog" class="stack">
+      <h2>Tela de espera</h2>
+      <div class="drawer-tools">
+        <button class="btn drawer-tool" type="button" data-act="light"><span aria-hidden="true">◐</span><b id="light-label">Acender a luz</b></button>
+        <button class="btn drawer-tool" type="button" data-act="fullscreen" id="btn-fullscreen"><span aria-hidden="true">⛶</span>Tela cheia</button>
+      </div>
+      <button class="btn" type="button" data-act="write">Escrever a mensagem</button>
+      <button class="btn" type="button" data-act="all">Chamar todos os personagens</button>
+      <button class="btn" type="button" data-act="sound" id="sound-label">Som: ligado</button>
+      <label class="field">
+        <span>Tema</span>
+        <select id="opt-theme"></select>
+      </label>
+      <section class="stack guests">
+        <div class="row between">
+          <h3>Convidados</h3>
+          <span class="muted" id="guest-count"></span>
+        </div>
+        <div class="row add-player">
+          <input type="text" id="guest-name" placeholder="Nome de quem chegou" maxlength="24" autocomplete="off" aria-label="Nome do convidado">
+          <button class="btn btn-primary" type="button" data-act="add-guest">Adicionar</button>
+        </div>
+        <ul class="guest-list" id="guest-list"></ul>
+        <p class="muted guest-note">Os jogadores cadastrados nos jogos também aparecem.</p>
+      </section>
+      <a class="btn" href="../../">Voltar para a central</a>
+      <button class="btn btn-ghost" value="cancel">Fechar</button>
+    </form>
+  </dialog>
+</body>
+</html>
