@@ -443,8 +443,47 @@ dialog::backdrop {
   font-weight: 800;
 }
 
+.members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .members li {
   padding: 2px 0;
+}
+
+/* jogador arrastável entre equipes */
+.members .member {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--team) 55%, transparent);
+  background: color-mix(in srgb, var(--team) 14%, var(--surface));
+  font-weight: 700;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.team-card.is-drop {
+  box-shadow: 0 0 0 3px var(--team), 0 0 22px var(--team);
+}
+
+.member-ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 300;
+  margin: -18px 0 0 -30px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 2px solid var(--team);
+  background: color-mix(in srgb, var(--team) 30%, #14121f);
+  color: #fff;
+  font-weight: 800;
+  pointer-events: none;
+  box-shadow: 0 10px 24px rgb(0 0 0 / 0.45);
 }
 
 /* ---------- central ---------- */

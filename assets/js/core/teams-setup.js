@@ -13,6 +13,11 @@ const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
 export function mountTeamsSetup(root, options = {}) {
   const { minTeams = 2, maxTeams = 4, minPerTeam = 2 } = options;
   const saved = options.initial ?? {};
+  // Montar de novo (voltar ao setup) desliga os ouvintes da montagem anterior.
+  root.unmountTeams?.();
+  const ctl = new AbortController();
+  root.unmountTeams = () => ctl.abort();
+  const on = (target, type, fn) => target.addEventListener(type, fn, { signal: ctl.signal });
 
   const state = {
     count: clamp(saved.teams?.length || minTeams, minTeams, maxTeams),
@@ -96,7 +101,7 @@ export function mountTeamsSetup(root, options = {}) {
             <input type="text" value="${esc(t.name)}" data-team-name="${i}" maxlength="20" aria-label="Nome da equipe">
           </div>
           <ul class="members">
-            ${members.map((p) => `<li>${esc(p.name)}</li>`).join('') || '<li class="muted">Sem jogadores</li>'}
+            ${members.map((p) => `<li class="member" data-member="${p.id}" title="Arraste para outra equipe">${esc(p.name)}</li>`).join('') || '<li class="muted">Sem jogadores · arraste alguém para cá</li>'}
           </ul>
           <small class="${members.length < minPerTeam ? 'warn-text' : 'muted'}">${members.length} jogador${members.length === 1 ? '' : 'es'}</small>
         </div>`;
@@ -109,7 +114,7 @@ export function mountTeamsSetup(root, options = {}) {
     renderTeams();
   }
 
-  ref('form').addEventListener('submit', (e) => {
+  on(ref('form'), 'submit', (e) => {
     e.preventDefault();
     const input = ref('name');
     const name = input.value.trim().replace(/\s+/g, ' ');
@@ -125,9 +130,9 @@ export function mountTeamsSetup(root, options = {}) {
     render();
   });
 
-  ref('name').addEventListener('input', (e) => e.target.setCustomValidity(''));
+  on(ref('name'), 'input', (e) => e.target.setCustomValidity(''));
 
-  root.addEventListener('click', (e) => {
+  on(root, 'click', (e) => {
     const remove = e.target.closest('[data-remove]');
     if (remove) {
       state.players = state.players.filter((p) => p.id !== remove.dataset.remove);
@@ -161,7 +166,7 @@ export function mountTeamsSetup(root, options = {}) {
     }
   });
 
-  root.addEventListener('change', (e) => {
+  on(root, 'change', (e) => {
     const sel = e.target.closest('[data-player]');
     if (sel) {
       state.players.find((p) => p.id === sel.dataset.player).team = Number(sel.value);
@@ -170,7 +175,7 @@ export function mountTeamsSetup(root, options = {}) {
     if (e.target.matches('[data-team-name]')) renderPlayers();
   });
 
-  root.addEventListener('input', (e) => {
+  on(root, 'input', (e) => {
     if (e.target.matches('[data-team-name]')) {
       state.teams[Number(e.target.dataset.teamName)].name = e.target.value;
     }
@@ -181,6 +186,54 @@ export function mountTeamsSetup(root, options = {}) {
       renderPlayers();
     }
   });
+
+  // Arrastar um jogador de um card de equipe para outro (dedo ou mouse).
+  let drag = null; // { id, x, y, ghost, over }
+  const cardAt = (x, y) => document.elementFromPoint(x, y)?.closest('[data-team-card]');
+
+  function endDrag() {
+    drag?.ghost?.remove();
+    drag?.over?.classList.remove('is-drop');
+    drag = null;
+  }
+
+  on(root, 'pointerdown', (e) => {
+    const member = e.target.closest('[data-member]');
+    if (!member || e.button > 0) return;
+    drag = { id: member.dataset.member, x: e.clientX, y: e.clientY, ghost: null, over: null };
+  });
+
+  on(window, 'pointermove', (e) => {
+    if (!drag) return;
+    if (!drag.ghost) {
+      if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+      const p = state.players.find((pl) => pl.id === drag.id);
+      drag.ghost = document.createElement('div');
+      drag.ghost.className = 'member-ghost';
+      drag.ghost.style.setProperty('--team', state.teams[p.team].color);
+      drag.ghost.textContent = p.name;
+      document.body.append(drag.ghost);
+    }
+    drag.ghost.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+    const over = cardAt(e.clientX, e.clientY);
+    if (over !== drag.over) {
+      drag.over?.classList.remove('is-drop');
+      over?.classList.add('is-drop');
+      drag.over = over;
+    }
+  });
+
+  on(window, 'pointerup', (e) => {
+    if (!drag?.ghost) return endDrag();
+    const card = cardAt(e.clientX, e.clientY);
+    const p = state.players.find((pl) => pl.id === drag.id);
+    endDrag();
+    if (card && p) {
+      p.team = Number(card.dataset.teamCard);
+      render();
+    }
+  });
+  on(window, 'pointercancel', endDrag);
 
   render();
 
