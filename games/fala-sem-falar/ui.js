@@ -157,7 +157,6 @@ function render(s) {
   const winner = s.teams[s.winner];
   play.innerHTML = `
     <div class="winner">
-      <div class="trophy" aria-hidden="true">🏆</div>
       <h2 class="who-title">${esc(winner.name)} venceu!</h2>
       <ol class="final-scores">
         ${[...s.teams]

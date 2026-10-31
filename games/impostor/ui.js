@@ -153,7 +153,7 @@ function renderLocal(s) {
           <p class="who-kicker">Rodada ${s.round} · passe o aparelho para</p>
           <h2 class="who-title">${esc(p.name)}</h2>
           <p class="result-hint">Só ${esc(p.name)} pode olhar. ${s.revealIdx + 1} de ${n}.</p>
-          <button class="neon-btn is-ok big-cta" type="button" data-act="show">👁 Ver minha carta</button>
+          <button class="neon-btn is-ok big-cta" type="button" data-act="show">Ver minha carta</button>
         </div>`;
     return;
   }

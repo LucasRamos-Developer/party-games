@@ -99,6 +99,103 @@
   text-shadow: 0 0 10px rgb(255 210 63 / 0.7);
 }
 
+/* pistas à esquerda, lista de palpites à direita */
+.play-area > .filme-board {
+  width: min(100%, 1240px);
+}
+
+.filme-board {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.clues {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.clues .neon-btn {
+  min-height: 60px;
+}
+
+.guesses {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: rgb(255 255 255 / 0.04);
+}
+
+.guesses-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  font: 800 1.2rem var(--font-display);
+}
+
+.guesses-head span {
+  font: 700 0.85rem var(--font);
+  color: var(--ink-2);
+}
+
+.film-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  align-content: start;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.film-opt {
+  appearance: none;
+  width: 100%;
+  height: 100%;
+  min-height: 48px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--clock) 50%, transparent);
+  background: color-mix(in srgb, var(--clock) 8%, rgb(255 255 255 / 0.03));
+  color: var(--ink);
+  font: 700 0.95rem / 1.2 var(--font);
+  text-align: left;
+  cursor: pointer;
+  animation: card-pop 0.25s ease-out;
+}
+
+.film-opt:hover {
+  border-color: var(--clock);
+}
+
+.film-opt:active {
+  transform: scale(0.97);
+}
+
+@media (max-width: 760px), (orientation: portrait) {
+  .filme-board {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) minmax(180px, 0.9fr);
+  }
+
+  .stage-stack .word-card {
+    min-height: auto;
+  }
+}
+
 .title-reveal.pop {
   animation: card-pop 0.5s cubic-bezier(0.2, 1.5, 0.4, 1);
 }

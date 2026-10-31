@@ -72,7 +72,7 @@ $('#cats').innerHTML =
     (c) => `<button class="cat" type="button" data-face="${c.key}" title="${esc(c.name)}" aria-pressed="false">
       <b>${c.key}</b><small>${SHORT_NAME[c.key]}</small>
     </button>`,
-  ).join('') + `<button class="cat cat-die" type="button" id="btn-roll-cat" title="Sortear categoria"><b>🎲</b><small>Sortear</small></button>`;
+  ).join('') + `<button class="cat cat-die" type="button" id="btn-roll-cat" title="Sortear categoria"><small>Sortear</small></button>`;
 const catDie = createDie($('#cats'), CATEGORIES.map((c) => c.key), { render: highlightFace });
 
 const text = () => STYLE_TEXT[game.state.settings.style] ?? STYLE_TEXT.desenho;
@@ -202,7 +202,7 @@ function renderWho(s) {
   let chips = '';
   if (s.phase === 'won') {
     kicker = 'Fim de jogo';
-    title = `🏆 ${s.teams[s.winner].name} venceu!`;
+    title = `${s.teams[s.winner].name} venceu!`;
   } else if (s.phase === 'move') {
     kicker = 'Acertou!';
     title = s.teams[s.mover].name;

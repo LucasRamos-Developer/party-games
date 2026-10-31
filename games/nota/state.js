@@ -20,16 +20,15 @@ function drawTheme(s) {
   return theme;
 }
 
-// Cada vez começa com 2 perguntas sorteadas e 2 livres.
+// Cada vez começa com 2 perguntas sorteadas e 2 livres, intercaladas; quem
+// abre (sorteada ou livre) também é sorteado.
 function newTurn(s, nota) {
+  const freeFirst = seeded(`nota:order:${s.turnCount}`)() < 0.5;
   s.turn = {
     nota,
-    cards: [
-      { kind: 'random', theme: drawTheme(s) },
-      { kind: 'random', theme: drawTheme(s) },
-      { kind: 'free' },
-      { kind: 'free' },
-    ],
+    cards: Array.from({ length: BASE_QUESTIONS }, (_, i) =>
+      (i % 2 === 0) === freeFirst ? { kind: 'free' } : { kind: 'random', theme: drawTheme(s) },
+    ),
     idx: 0,
     prize: MAX_PRIZE,
     guess: null,

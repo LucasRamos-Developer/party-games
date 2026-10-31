@@ -72,8 +72,8 @@ export function createShell({
   row.className = 'start-row';
   start.before(row);
   row.append(start);
-  row.insertAdjacentHTML('beforeend', '<button class="btn btn-lg" id="btn-practice" type="button">🎓 Rodada de treino</button>');
-  $('.hud')?.insertAdjacentHTML('afterbegin', '<span class="practice-badge" id="practice-badge" hidden>🎓 Treino</span>');
+  row.insertAdjacentHTML('beforeend', '<button class="btn btn-lg" id="btn-practice" type="button">Rodada de treino</button>');
+  $('.hud')?.insertAdjacentHTML('afterbegin', '<span class="practice-badge" id="practice-badge" hidden>Treino</span>');
   mountHowTo($('#menu-dialog'));
 
   function show(name) {

@@ -41,7 +41,7 @@
         <ol>
           <li>O app sorteia um confronto: um jogador de cada uma das duas equipes.</li>
           <li>Aparece uma pergunta, como <i>Frutas</i> ou <i>Países que começam com B</i>.</li>
-          <li><b>Leilão:</b> as equipes se alternam dando lances (“meu jogador fala 6!”). Cada vez tem um tempo; se ele acabar, quem estava decidindo responde. Quem passar deixa o último lance para o adversário.</li>
+          <li><b>Leilão:</b> cada equipe tem o seu lado da tela e elas se alternam dando lances (“meu jogador fala 6!”). Cada equipe tem o seu relógio, que só corre na vez dela e não reinicia: quem zerar é obrigado a responder. Quem disser <b>Duvido!</b> obriga o adversário a cumprir o último lance.</li>
           <li>Quem ganhou o leilão tem o tempo do relógio para falar a quantidade prometida. O outro time confere.</li>
           <li>Cumpriu a meta: +1 ponto. Não cumpriu: +1 para o adversário. Quando todos tiverem jogado, vence quem tiver mais pontos.</li>
         </ol>
@@ -67,8 +67,8 @@
             <select id="opt-timer"><option value="60">1 minuto</option><option value="90" selected>1 min 30 s</option><option value="120">2 minutos</option></select>
           </label>
           <label class="field">
-            <span>Tempo de cada lance</span>
-            <select id="opt-bid"><option value="15">15 segundos</option><option value="30">30 segundos</option><option value="45" selected>45 segundos</option><option value="60">1 minuto</option></select>
+            <span>Tempo de cada equipe no leilão</span>
+            <select id="opt-bid"><option value="30">30 segundos</option><option value="45" selected>45 segundos</option><option value="60">1 minuto</option><option value="90">1 min 30 s</option></select>
           </label>
         </div>
       </section>

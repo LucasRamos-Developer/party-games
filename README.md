@@ -12,9 +12,9 @@ continua na mesa (cartas, papel e caneta).
 | **Fala Sem Falar** | `games/fala-sem-falar/` | Explicar a palavra sem dizer as 4 proibidas. Um tablet, timer com bomba, revisão do turno e meta de pontos. |
 | **Na Testa** | `games/na-testa/` | Celular na testa: inclinar para baixo = acertou, para cima = passa (ou tocar na tela). 8 categorias. |
 | **Impostor** | `games/impostor/` | Todos têm a mesma palavra, menos o impostor. Um aparelho passando de mão em mão, ou **cada um no seu celular** com código de sala (sorteio com semente, sem servidor). |
-| **Qual é a Nota?** | `games/nota/` | Quem segura o tablet sabe uma nota de 0 a 10; 2 perguntas sorteadas + 2 livres. Acertar em cheio vale 10; cada pergunta extra desconta (−1 sorteada, −2 livre, mínimo 2). |
-| **Que Filme É Esse?** | `games/filme/` | 5 pistas do mais difícil ao mais fácil (10, 8, 6, 4, 2 pontos). Aceita imagens próprias em `games/filme/frames/`. |
-| **Quantas Palavras?** | `games/quantas/` | Leilão de respostas: um jogador de cada equipe; lances alternados com tempo por vez (se acabar, quem estava decidindo responde); quem ganha tem 1min30 para falar a quantidade prometida. Modo invertido, sorteio aleatório ou escolhido, nível Fácil/Misto/Desafio. |
+| **Qual é a Nota?** | `games/nota/` | Quem segura o tablet vê a nota de 0 a 10 e a esconde; 2 perguntas sorteadas + 2 livres, intercaladas em ordem sorteada. Acertar em cheio vale 10; cada pergunta extra desconta (−1 sorteada, −2 livre, mínimo 2). |
+| **Que Filme É Esse?** | `games/filme/` | 50 filmes; 5 pistas do mais difícil ao mais fácil (10, 8, 6, 4, 2 pontos). O chute é tocando na lista ao lado, que encolhe a cada pista (50 → 10) mantendo os filmes mais parecidos; errou, zera. Aceita imagens próprias em `games/filme/frames/`. |
+| **Quantas Palavras?** | `games/quantas/` | Leilão de respostas: um jogador de cada equipe; um lado da tela por equipe, lances sugeridos (próximo número e de 5 em 5) + seletor −/+, um relógio por equipe que só corre na vez dela (zerou, responde); "Duvido!" obriga o adversário a cumprir o lance; quem ganha tem 1min30 para falar a quantidade prometida. Modo invertido, sorteio aleatório ou escolhido, nível Fácil/Misto/Desafio. |
 
 Todos os jogos têm **Como jogar** (no setup e no menu) e uma **rodada de treino**: uma rodada que não vale ponto, com balões explicando cada botão na hora (`assets/js/core/coach.js` e `practice.js`).
 

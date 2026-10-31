@@ -6,12 +6,15 @@ export const TIPS = {
   ],
   peek: [
     { sel: '.nota-big', text: 'Esta é a nota: <b>0 é o pior</b> e <b>10 é o melhor</b>. Guarde de cabeça!' },
-    { sel: '[data-act="known"]', text: 'Toque aqui: a nota some e você vira o tablet para a equipe.' },
+    { sel: '[data-act="hide"]', text: 'Guardou de cabeça? Toque aqui para <b>esconder a nota</b>.' },
+  ],
+  hidden: [
+    { sel: '[data-act="known"]', text: 'Agora vire o tablet para a equipe e toque para ver a primeira pergunta.' },
   ],
   questions: [
     { sel: '.question-card', text: 'A pergunta aparece aqui. Quem sabe a nota responde com algo que combine com ela. Ex.: comida nota 2 = jiló!' },
     { sel: '.prize', text: 'Acertar a nota exata vale estes pontos.' },
-    { sel: '[data-act="next-card"]', text: 'São 4 perguntas: 2 sorteadas e 2 que a <b>equipe inventa</b>.' },
+    { sel: '[data-act="next-card"]', text: 'São 4 perguntas, intercaladas: 2 sorteadas e 2 que a <b>equipe inventa</b>.' },
   ],
   extra: [
     { sel: '.extra', text: 'Ainda em dúvida? Peçam mais perguntas, mas cada uma desconta: sorteada −1, livre −2 (mínimo 2).' },

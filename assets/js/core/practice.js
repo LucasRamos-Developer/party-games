@@ -49,7 +49,7 @@ export function createPractice({ tips, tipKey = (s) => s.phase, isDone = () => f
       coach.stop();
       await new Promise((r) => setTimeout(r, 400));
       const choice = await coach.step({
-        title: 'Treino concluído! 🎉',
+        title: 'Treino concluído!',
         text: 'Agora vocês já sabem jogar. O placar do treino não vale: a partida de verdade começa do zero.',
         actions: [
           { id: 'again', label: 'Treinar de novo' },

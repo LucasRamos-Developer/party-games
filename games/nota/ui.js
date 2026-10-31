@@ -12,14 +12,15 @@ const play = $('#play');
 const screen = $('#screen-game');
 const randomNota = () => randomInt(11);
 
-let peek = false; // a nota está visível para quem segura?
+// Quem segura: 'closed' (ainda não viu) → 'open' (vendo) → 'hidden' (já viu e escondeu).
+let peek = 'closed';
 
 const shell = createShell({
   store,
   settingsKey: 'nota:setup',
   tips: TIPS,
   tipKey: (s) => {
-    if (s.phase === 'secret') return peek ? 'peek' : 'secret';
+    if (s.phase === 'secret') return { closed: 'secret', open: 'peek', hidden: 'hidden' }[peek];
     const t = s.turn;
     if (s.phase === 'questions' && t.idx === t.cards.length - 1 && t.cards.length >= BASE_QUESTIONS) return 'extra';
     return s.phase;
@@ -31,7 +32,7 @@ const shell = createShell({
     $('#opt-rounds').value = String({ ...DEFAULT_SETTINGS, ...saved }.rounds);
   },
   onEnterGame: () => {
-    peek = false;
+    peek = 'closed';
     render(store.state);
   },
   summary: (s) =>
@@ -41,7 +42,7 @@ const shell = createShell({
 store.subscribe((s, action) => {
   if (!s) return;
   if (action.type === 'guess') (s.turn.hit ? success : buzz)();
-  if (action.type === 'next' || action.type === '@undo') peek = false;
+  if (action.type === 'next' || action.type === '@undo') peek = 'closed';
   if (!screen.hidden) render(s);
 });
 
@@ -57,13 +58,24 @@ function render(s) {
 
   if (s.phase === 'secret') {
     const holder = esc(holderOf(team));
-    play.innerHTML = peek
-      ? `
+    if (peek === 'open') {
+      play.innerHTML = `
       <div class="handoff">
         <p class="who-kicker">A nota secreta é</p>
         <p class="nota-big pop">${t.nota}</p>
         <p class="scale"><span>0 = o pior</span><span>10 = o melhor</span></p>
-        <button class="neon-btn is-ok big-cta" type="button" data-act="known">Já sei a nota</button>
+        <button class="neon-btn is-ok big-cta" type="button" data-act="hide">Esconder a nota</button>
+      </div>`;
+      return;
+    }
+    play.innerHTML = peek === 'hidden'
+      ? `
+      <div class="handoff">
+        <p class="who-kicker">Nota guardada</p>
+        <h2 class="who-title">Pode virar o tablet</h2>
+        <p class="result-hint">${holder} já sabe a nota. ${esc(team.name)}, agora podem olhar!</p>
+        <button class="neon-btn is-ok big-cta" type="button" data-act="known">Mostrar a primeira pergunta</button>
+        <button class="link-btn" type="button" data-act="peek">Ver a nota de novo</button>
       </div>`
       : `
       <div class="handoff">
@@ -71,7 +83,7 @@ function render(s) {
         <p class="who-kicker">${esc(team.name)} · só quem segura pode ver</p>
         <h2 class="who-title">${holder}</h2>
         <p class="result-hint">${esc(team.name)}, não olhem a tela! ${holder}, toque para ver a nota.</p>
-        <button class="neon-btn big-cta" type="button" data-act="peek">👁 Ver nota</button>
+        <button class="neon-btn big-cta" type="button" data-act="peek">Ver nota</button>
       </div>`;
     return;
   }
@@ -86,7 +98,7 @@ function render(s) {
         ${prizeMeter(t)}
       </div>
       <div class="word-card question-card pop">
-        <span class="q-kind">${card.kind === 'random' ? '🎲 Pergunta sorteada' : '✍️ Pergunta livre'}</span>
+        <span class="q-kind">${card.kind === 'random' ? 'Pergunta sorteada' : 'Pergunta livre'}</span>
         <span class="q-text">${card.kind === 'random' ? esc(question(THEMES[card.theme])) : 'Inventem uma pergunta!'}</span>
         <span class="q-sub">${
           card.kind === 'random'
@@ -143,7 +155,6 @@ function render(s) {
   const winner = s.teams[s.winner];
   play.innerHTML = `
     <div class="winner">
-      <div class="trophy" aria-hidden="true">🏆</div>
       <h2 class="who-title">${esc(winner.name)} venceu!</h2>
       <ol class="final-scores">
         ${[...s.teams]
@@ -163,14 +174,16 @@ play.addEventListener('click', (e) => {
   if (extra) store.dispatch({ type: 'extra', kind: extra.dataset.extra });
   const guess = e.target.closest('[data-guess]');
   if (guess) store.dispatch({ type: 'guess', value: Number(guess.dataset.guess) });
-  switch (e.target.closest('[data-act]')?.dataset.act) {
+  const act = e.target.closest('[data-act]')?.dataset.act;
+  switch (act) {
     case 'peek':
-      peek = true;
+    case 'hide':
+      peek = act === 'peek' ? 'open' : 'hidden';
       render(store.state);
       shell.tips(store.state);
       break;
     case 'known':
-      peek = false;
+      peek = 'closed';
       store.dispatch({ type: 'known' });
       break;
     case 'prev':

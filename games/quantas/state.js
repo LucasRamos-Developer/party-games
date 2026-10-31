@@ -11,7 +11,7 @@ import { LEVELS, QUESTIONS } from './words.js';
 
 export const DEFAULT_SETTINGS = {
   timer: 90, // tempo para responder
-  bidTime: 45, // tempo de cada vez no leilão
+  bidTime: 45, // tempo de cada equipe no leilão (só corre na vez dela, não reinicia)
   mode: 'team', // team: o time dá os lances e o jogador separado responde · pair: os sorteados dão os lances e o time responde
   draw: 'random', // random | manual
   level: 'misto',
@@ -24,6 +24,10 @@ const allPlayers = (team) => team.players.map((_, i) => i);
 export const available = (team) => (team.pool.length ? team.pool : allPlayers(team));
 export const eligibleTeams = (s) => s.teams.filter((t) => !s.contenders || s.contenders.includes(t.id));
 export const otherTeam = (r, id) => (r.a.team === id ? r.b.team : r.a.team);
+
+// Lances sugeridos: o próximo número e daí de 5 em 5 (no começo, 1, 5, 10…).
+// Os 4 primeiros viram botões; o 5º é o ponto de partida do seletor −/+.
+export const bidOptions = (bid) => Array.from({ length: 5 }, (_, i) => (bid === 0 ? Math.max(1, 5 * i) : bid + 1 + 5 * i));
 
 export function newGame({ teams, settings, rng }) {
   const st = { ...DEFAULT_SETTINGS, ...settings };
@@ -113,14 +117,14 @@ export function reduce(prev, action) {
       r.turn = otherTeam(r, r.turn);
       return s;
 
-    // Passar: quem deu o último lance tem que responder.
+    // Duvidar: quem deu o último lance tem que responder.
     case 'pass':
       if (s.phase !== 'auction' || r.owner === null) return prev;
       r.answerer = r.owner;
       s.phase = 'answer';
       return s;
 
-    // Acabou o tempo de quem estava decidindo: essa equipe responde.
+    // Zerou o relógio de quem estava decidindo: essa equipe responde.
     case 'timeout':
       if (s.phase !== 'auction') return prev;
       r.answerer = r.turn;

@@ -6,7 +6,7 @@ import { beep, buzz, success } from '../../assets/js/core/sound.js';
 import { freshRng } from '../../assets/js/core/random.js';
 import { $, esc } from '../../assets/js/core/dom.js';
 import { QUESTIONS } from './words.js';
-import { DEFAULT_SETTINGS, available, eligibleTeams, newGame, otherTeam, reduce, suggestConfront } from './state.js';
+import { DEFAULT_SETTINGS, available, bidOptions, eligibleTeams, newGame, otherTeam, reduce, suggestConfront } from './state.js';
 import { TIPS } from './tips.js';
 
 const store = createStore({ key: 'quantas:current', reduce });
@@ -19,14 +19,21 @@ function makeClock(className, onTap) {
   return { box, clock: mountClock(box, { onTap }) };
 }
 
-const bid = makeClock('bid-clock', () => {});
+// Leilão: um relógio por lado (a/b), que só corre na vez daquele lado.
+const SIDES = ['a', 'b'];
+const bids = {};
+for (const key of SIDES) {
+  const side = makeClock('bid-clock', () => {});
+  const timer = createTimer({
+    duration: DEFAULT_SETTINGS.bidTime,
+    onTick: (r, t) => side.clock.update(r, t, { running: timer?.running ?? false, hint: timer?.running ? 'sua vez' : '' }),
+    onEnd: () => store.dispatch({ type: 'timeout' }),
+  });
+  bids[key] = { ...side, timer };
+}
+const turnSide = (r) => (r.turn === r.a.team ? 'a' : 'b');
 const answer = makeClock('answer-clock', () => {
   if (store.state?.phase === 'answer') answerTimer.toggle();
-});
-const bidTimer = createTimer({
-  duration: DEFAULT_SETTINGS.bidTime,
-  onTick: (r, t) => bid.clock.update(r, t, { running: bidTimer?.running ?? false, hint: 'para decidir' }),
-  onEnd: () => store.dispatch({ type: 'timeout' }),
 });
 const answerTimer = createTimer({
   duration: DEFAULT_SETTINGS.timer,
@@ -39,8 +46,8 @@ const answerTimer = createTimer({
 
 let suggestion = null; // { key, a, b } no sorteio aleatório
 let picks = []; // [{ team, player }] no sorteio manual
-let bidValue = 1;
-const resume = { bid: false, answer: false };
+let step = { bid: null, value: 0 }; // seletor −/+ do leilão; volta à sugestão a cada lance novo
+const resume = { a: false, b: false, answer: false };
 
 const shell = createShell({
   store,
@@ -49,7 +56,8 @@ const shell = createShell({
   practiceDone: (action) => action.type === 'next',
   onTips: (on) => {
     for (const [key, timer] of [
-      ['bid', bidTimer],
+      ['a', bids.a.timer],
+      ['b', bids.b.timer],
       ['answer', answerTimer],
     ]) {
       if (on) {
@@ -76,6 +84,7 @@ const shell = createShell({
       ['#opt-bid', 'bidTime'],
     ]) {
       $(id).value = String(st[key]);
+      if ($(id).selectedIndex < 0) $(id).value = String(DEFAULT_SETTINGS[key]); // opção salva que não existe mais
     }
   },
   onEnterGame: () => {
@@ -86,15 +95,15 @@ const shell = createShell({
   },
 });
 
-// Relógio do leilão reinicia a cada vez; o da resposta espera o toque.
+// No leilão cada equipe tem o seu tempo, que não reinicia a cada lance: só
+// corre o relógio de quem está decidindo. O da resposta espera o toque.
 function syncTimers(s, action) {
   if (s.phase === 'auction') {
-    if (['confront', 'bid', '@undo', '@enter', '@restore'].includes(action.type)) {
-      bidTimer.reset(s.settings.bidTime);
-      bidTimer.start();
-    }
+    if (['confront', '@enter', '@restore'].includes(action.type)) for (const key of SIDES) bids[key].timer.reset(s.settings.bidTime);
+    const turn = turnSide(s.round);
+    for (const key of SIDES) key === turn ? bids[key].timer.start() : bids[key].timer.pause();
   } else {
-    bidTimer.reset(s.settings.bidTime);
+    for (const key of SIDES) bids[key].timer.pause();
   }
   if (s.phase !== 'answer' || action.type === 'timeout' || action.type === 'pass') answerTimer.reset(s.settings.timer);
 }
@@ -107,8 +116,6 @@ store.subscribe((s, action) => {
   }
   if (action.type === 'fail') buzz();
   if (action.type === 'timeout') boom(screen);
-  if (action.type === 'bid') bidValue = s.round.bid + 1;
-  if (action.type === 'confront' || action.type === '@undo') bidValue = (s.round?.bid ?? 0) + 1;
   if (action.type === 'next') {
     suggestion = null;
     picks = [];
@@ -162,7 +169,7 @@ function renderDraw(s) {
         <div class="confront">${side(suggestion.a)}<span class="vs">×</span>${side(suggestion.b)}</div>
         <p class="result-hint">${hint}</p>
         <button class="neon-btn is-ok big-cta" type="button" data-act="go">${goText}</button>
-        <button class="link-btn" type="button" data-act="reroll">🎲 Sortear outro confronto</button>
+        <button class="link-btn" type="button" data-act="reroll">Sortear outro confronto</button>
       </div>`;
     return;
   }
@@ -194,42 +201,59 @@ function renderDraw(s) {
     <button class="neon-btn is-ok" type="button" data-act="go" ${picks.length === 2 ? '' : 'disabled'}>${goText}</button>`;
 }
 
+// Um lado do leilão por equipe, cada um com o seu relógio: só o lado da vez fica ativo.
+function renderBidSide(s, key) {
+  const r = s.round;
+  const side = r[key];
+  const team = s.teams[side.team];
+  const active = r.turn === side.team;
+  const off = active ? '' : 'disabled';
+  const status = active ? 'Sua vez' : r.owner === side.team ? `Deu ${r.bid}` : 'Aguardando';
+  return `
+    <div class="bid-side ${active ? 'is-active' : ''}" style="--team:${team.color}; --clock:${team.color}">
+      <div class="side-head">
+        <div data-slot="bid-clock-${key}"></div>
+        <div>
+          <p class="side-team">${esc(team.name)}</p>
+          <p class="side-player">${esc(nameOf(s, side))}</p>
+          <p class="side-status">${status}</p>
+        </div>
+      </div>
+      <div class="quick-bids">
+        ${bidOptions(r.bid)
+          .slice(0, 4)
+          .map((n) => `<button class="bid-btn" type="button" data-bid="${n}" ${off}>${n}</button>`)
+          .join('')}
+      </div>
+      <div class="bid-stepper">
+        <button type="button" class="icon-btn" data-step="-1" aria-label="Diminuir" ${active && step.value > r.bid + 1 ? '' : 'disabled'}>−</button>
+        <button class="bid-btn" type="button" data-bid="${step.value}" ${off}>${step.value}</button>
+        <button type="button" class="icon-btn" data-step="1" aria-label="Aumentar" ${active && step.value < 99 ? '' : 'disabled'}>+</button>
+      </div>
+      <button class="neon-btn is-skip doubt-btn" type="button" data-act="pass" ${active && r.owner !== null ? '' : 'disabled'}>Duvido!</button>
+    </div>`;
+}
+
 function renderAuction(s) {
   const r = s.round;
   const q = QUESTIONS[r.question];
-  const turn = s.teams[r.turn];
-  const pair = s.settings.mode === 'pair';
-  const deciding = pair ? esc(nameOf(s, r.a.team === r.turn ? r.a : r.b)) : esc(turn.name);
-  bidValue = Math.max(bidValue, r.bid + 1);
+  if (step.bid !== r.bid) step = { bid: r.bid, value: bidOptions(r.bid)[4] };
+  const owner = r.owner === null ? null : r.a.team === r.owner ? r.a : r.b;
   play.innerHTML = `
     <div class="word-card q-card">
       <span class="q-kind">Quantos você consegue falar?</span>
       <span class="q-text">${esc(q.q)}</span>
     </div>
-    <div class="auction">
-      <div data-slot="bid-clock"></div>
-      <div class="auction-info">
-        <p class="who-kicker">Vez de ${deciding} decidir</p>
-        <p class="bid-now">${
-          r.owner === null
-            ? 'Ninguém deu lance ainda'
-            : `Lance atual: <b>${r.bid}</b> · ${pair ? esc(nameOf(s, r.a.team === r.owner ? r.a : r.b)) : teamName(s, r.owner)}`
-        }</p>
-        <p class="result-hint">Cubra o lance ou passe. Se o tempo acabar, ${deciding} responde!</p>
+    <div class="auction-board">
+      ${renderBidSide(s, 'a')}
+      <div class="auction-mid">
+        <p class="bid-now">${owner ? `Lance: <b>${r.bid}</b>` : 'Sem lance'}</p>
+        ${owner ? `<p class="side-team" style="--team:${s.teams[owner.team].color}">${s.settings.mode === 'pair' ? esc(nameOf(s, owner)) : teamName(s, owner.team)}</p>` : ''}
       </div>
+      ${renderBidSide(s, 'b')}
     </div>
-    <div class="bid-row">
-      <div class="stepper big-stepper">
-        <button type="button" class="icon-btn" data-step="-1" aria-label="Diminuir lance" ${bidValue <= r.bid + 1 ? 'disabled' : ''}>−</button>
-        <output>${bidValue}</output>
-        <button type="button" class="icon-btn" data-step="1" aria-label="Aumentar lance">+</button>
-      </div>
-      <button class="neon-btn" type="button" data-act="bid" style="--c:${turn.color}">Lance de ${bidValue}</button>
-    </div>
-    <button class="neon-btn is-skip" type="button" data-act="pass" ${r.owner === null ? 'disabled' : ''}>
-      ${r.owner === null ? 'Passar (precisa ter um lance)' : `Passar · ${pair ? esc(nameOf(s, r.a.team === r.owner ? r.a : r.b)) : teamName(s, r.owner)} responde ${r.bid}`}
-    </button>`;
-  play.querySelector('[data-slot="bid-clock"]').replaceWith(bid.box);
+    <p class="result-hint">Dê um lance maior ou diga <b>Duvido!</b> para o outro lado responder. Zerou o seu relógio, você responde.</p>`;
+  for (const key of SIDES) play.querySelector(`[data-slot="bid-clock-${key}"]`).replaceWith(bids[key].box);
 }
 
 function renderAnswer(s) {
@@ -272,7 +296,6 @@ function renderWinner(s) {
   const winner = s.teams[s.winner];
   play.innerHTML = `
     <div class="winner">
-      <div class="trophy" aria-hidden="true">🏆</div>
       <h2 class="who-title">${esc(winner.name)} venceu!</h2>
       <ol class="final-scores">
         ${[...s.teams]
@@ -289,10 +312,15 @@ function renderWinner(s) {
 
 play.addEventListener('click', (e) => {
   const s = store.state;
-  const step = e.target.closest('[data-step]');
-  if (step) {
-    bidValue = Math.max(s.round.bid + 1, bidValue + Number(step.dataset.step));
+  const stepBtn = e.target.closest('[data-step]');
+  if (stepBtn) {
+    step.value = Math.min(99, Math.max(s.round.bid + 1, step.value + Number(stepBtn.dataset.step)));
     render(s);
+    return;
+  }
+  const bidBtn = e.target.closest('[data-bid]');
+  if (bidBtn) {
+    store.dispatch({ type: 'bid', value: Number(bidBtn.dataset.bid) });
     return;
   }
   const pickBtn = e.target.closest('[data-pick]');
@@ -318,9 +346,6 @@ play.addEventListener('click', (e) => {
       if (pair) store.dispatch({ type: 'confront', a: pair.a, b: pair.b });
       break;
     }
-    case 'bid':
-      store.dispatch({ type: 'bid', value: bidValue });
-      break;
     case 'pass':
       store.dispatch({ type: 'pass' });
       break;

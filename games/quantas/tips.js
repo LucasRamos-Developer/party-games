@@ -14,9 +14,10 @@ export const TIPS = {
   ],
   auction: (s) => [
     { sel: '.q-card', text: 'A pergunta: quantos itens dela vocês conseguem falar no tempo?' },
-    { sel: '.bid-clock', text: `Cada vez tem <b>${s.settings.bidTime} segundos</b> para decidir. Se acabar, quem estava decidindo tem que responder!` },
-    { sel: '.bid-row', text: 'Escolha o número e dê um lance <b>maior</b> que o atual. A vez passa para o outro lado.' },
-    { sel: '[data-act="pass"]', text: 'Achou demais? <b>Passe</b>: quem deu o último lance tem que cumprir.' },
+    { sel: '.bid-side.is-active .bid-clock', text: `Cada equipe tem o seu relógio: <b>${s.settings.bidTime} segundos</b> no total, que só correm na sua vez. Zerou, essa equipe tem que responder!` },
+    { sel: '.bid-side.is-active .quick-bids', text: 'Toque num número para dar o lance. A vez passa para o lado da outra equipe, já com os próximos números.' },
+    { sel: '.bid-side.is-active .bid-stepper', text: 'Quer mais alto? Ajuste no <b>− / +</b> e toque no número.' },
+    { sel: '.bid-side.is-active .doubt-btn', text: 'Achou demais? Diga <b>Duvido!</b>: a outra equipe é obrigada a cumprir o lance dela.' },
   ],
   answer: [
     { sel: '.answer-clock', text: 'Quando quem responde estiver pronto, <b>toque no relógio</b>.' },

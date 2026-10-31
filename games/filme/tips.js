@@ -4,8 +4,8 @@ export const TIPS = {
     { sel: '.who-kicker', text: 'A dica geral ajuda a equipe a começar.' },
     { sel: '.stages', text: 'Cada pista nova vale menos: <b>10, 8, 6, 4 e 2</b> pontos.' },
     { sel: '.stage-stack .word-card', text: 'A equipe da vez tenta adivinhar o filme por esta pista.' },
-    { sel: '[data-act="hit"]', text: 'Acertaram? Toque aqui e ganham os pontos da pista atual.' },
-    { sel: '[data-act="miss"]', text: 'Erraram o chute? Abre a próxima pista, mais fácil.' },
+    { sel: '.guesses', text: 'Achou? Toque no filme da lista. Acertou, ganha os pontos; <b>errou, zera</b>!' },
+    { sel: '[data-act="clue"]', text: 'Na dúvida, abra a próxima pista: vale menos, mas a lista diminui.' },
   ],
   reveal: [
     { sel: '.title-reveal', text: 'Aqui aparece o filme certo.' },

@@ -3,12 +3,13 @@ import { createShell, renderScores } from '../../assets/js/core/shell.js';
 import { buzz, skip, success } from '../../assets/js/core/sound.js';
 import { $, esc } from '../../assets/js/core/dom.js';
 import { FILMES } from './filmes.js';
-import { DEFAULT_SETTINGS, STAGES, newGame, reduce, stagePoints } from './state.js';
+import { DEFAULT_SETTINGS, STAGES, newGame, reduce, shownFilms, stagePoints } from './state.js';
 import { TIPS } from './tips.js';
 
 const store = createStore({ key: 'filme:current', reduce });
 const play = $('#play');
 const screen = $('#screen-game');
+const byTitle = (a, b) => FILMES[a].titulo.localeCompare(FILMES[b].titulo, 'pt');
 
 const shell = createShell({
   store,
@@ -26,8 +27,8 @@ const shell = createShell({
 
 store.subscribe((s, action) => {
   if (!s) return;
-  if (action.type === 'hit') success();
-  if (action.type === 'miss') (s.phase === 'reveal' ? buzz : skip)();
+  if (action.type === 'guess') (s.turn.result === 'hit' ? success : buzz)();
+  if (action.type === 'clue') skip();
   if (action.type === 'giveUp') buzz();
   if (!screen.hidden) render(s);
 });
@@ -39,6 +40,12 @@ function stageContent(film, stage) {
     return `<img class="frame" src="frames/${esc(film.id)}/${esc(frame)}" alt="Etapa ${stage + 1}">`;
   }
   return `<p class="clue">${esc(film.etapas[stage])}</p>`;
+}
+
+function resultText(team, t) {
+  if (t.result === 'hit') return `${esc(team.name)} acertou! +${t.points}`;
+  if (t.result === 'miss') return `${esc(team.name)} chutou <b>${esc(FILMES[t.guess].titulo)}</b> e zerou`;
+  return `${esc(team.name)} não pontuou`;
 }
 
 function render(s) {
@@ -66,15 +73,27 @@ function render(s) {
         .reverse()
         .map((i) => `<div class="stage-card ${i === t.stage ? 'word-card pop' : 'is-old'}">${i === t.stage ? '' : `<span class="stage-num">Pista ${i + 1}</span>`}${stageContent(film, i)}</div>`)
         .join('');
+      const options = shownFilms(t)
+        .sort(byTitle)
+        .map((i) => `<li><button class="film-opt" type="button" data-film="${i}">${esc(FILMES[i].titulo)}</button></li>`)
+        .join('');
+      const last = t.stage === STAGES - 1;
       play.innerHTML = `
         ${top}
-        <div class="stage-stack">${opened}</div>
-        <p class="prize-now">Valendo <b>${stagePoints(t.stage)}</b> pontos · pista ${t.stage + 1} de ${STAGES}</p>
-        <div class="duo">
-          <button class="neon-btn is-bad" type="button" data-act="miss">${t.stage < STAGES - 1 ? '✗ Errou · próxima pista' : '✗ Errou'}</button>
-          <button class="neon-btn is-ok" type="button" data-act="hit">✓ Acertou! +${stagePoints(t.stage)}</button>
-        </div>
-        <button class="link-btn" type="button" data-act="giveUp">Desistir deste filme</button>`;
+        <div class="filme-board">
+          <div class="clues">
+            <div class="stage-stack">${opened}</div>
+            <p class="prize-now">Valendo <b>${stagePoints(t.stage)}</b> pontos · pista ${t.stage + 1} de ${STAGES}</p>
+            <button class="neon-btn is-skip" type="button" data-act="clue" ${last ? 'disabled' : ''}>${
+              last ? 'Esta é a última pista' : `Próxima pista · vale ${stagePoints(t.stage + 1)}`
+            }</button>
+            <button class="link-btn" type="button" data-act="giveUp">Desistir deste filme</button>
+          </div>
+          <section class="guesses" aria-label="Lista de filmes">
+            <p class="guesses-head">Qual é o filme? <span>${shownFilms(t).length} na lista · errou, zera</span></p>
+            <ul class="film-list">${options}</ul>
+          </section>
+        </div>`;
       return;
     }
 
@@ -83,7 +102,7 @@ function render(s) {
       <div class="handoff">
         <p class="who-kicker">O filme era</p>
         <h2 class="who-title title-reveal pop">${esc(film.titulo)}</h2>
-        <p class="review-total">${t.result === 'hit' ? `${esc(team.name)} acertou! +${t.points}` : `${esc(team.name)} não pontuou`}</p>
+        <p class="review-total">${resultText(team, t)}</p>
         <button class="neon-btn is-ok big-cta" type="button" data-act="next">Próximo filme ›</button>
       </div>`;
     return;
@@ -92,7 +111,6 @@ function render(s) {
   const winner = s.teams[s.winner];
   play.innerHTML = `
     <div class="winner">
-      <div class="trophy" aria-hidden="true">🏆</div>
       <h2 class="who-title">${esc(winner.name)} venceu!</h2>
       <ol class="final-scores">
         ${[...s.teams]
@@ -108,10 +126,13 @@ function render(s) {
 }
 
 play.addEventListener('click', (e) => {
+  const guess = e.target.closest('[data-film]');
+  if (guess) store.dispatch({ type: 'guess', film: Number(guess.dataset.film) });
   const act = e.target.closest('[data-act]')?.dataset.act;
-  if (['hit', 'miss', 'giveUp', 'next'].includes(act)) store.dispatch({ type: act });
+  if (['clue', 'giveUp', 'next'].includes(act)) store.dispatch({ type: act });
   if (act === 'restart') shell.restart();
   if (act === 'setup') shell.enterSetup();
 });
 
-shell.init();
+// Partidas salvas antes da lista de palpites não têm o ranking: começam do zero.
+shell.init((s) => s.phase !== 'won' && (!s.turn || Array.isArray(s.turn.ranking)));

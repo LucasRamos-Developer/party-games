@@ -79,16 +79,48 @@
   text-shadow: 0 0 12px var(--clock), 0 0 36px var(--clock);
 }
 
-.auction {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+/* leilão: um lado para cada equipe, relógio no meio */
+.play-area > .auction-board {
+  width: min(100%, 1100px);
 }
 
-.auction .clock-wrap {
+.auction-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-areas: "a mid b";
+  gap: 14px;
+  align-items: stretch;
+}
+
+.bid-side:first-child {
+  grid-area: a;
+}
+
+.bid-side:last-child {
+  grid-area: b;
+}
+
+.auction-mid {
+  grid-area: mid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.side-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.side-head .clock-wrap {
   flex: none;
-  width: clamp(96px, 16vh, 140px);
-  height: clamp(96px, 16vh, 140px);
+  width: clamp(84px, 15vh, 130px);
+  height: clamp(84px, 15vh, 130px);
   min-height: 0;
 }
 
@@ -102,29 +134,85 @@
   text-shadow: 0 0 10px rgb(255 210 63 / 0.7);
 }
 
-.bid-row {
+.bid-side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 24px;
+  border: 2px solid color-mix(in srgb, var(--team) 35%, transparent);
+  background: color-mix(in srgb, var(--team) 6%, rgb(255 255 255 / 0.02));
+  opacity: 0.45;
+  transition: opacity 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bid-side.is-active {
+  border-color: var(--team);
+  box-shadow: 0 0 26px color-mix(in srgb, var(--team) 45%, transparent);
+  opacity: 1;
+}
+
+.bid-side .side-team,
+.side-player,
+.side-status {
+  margin: 0;
+  text-align: center;
+}
+
+.side-player {
+  font: 800 clamp(1.2rem, 2.6vw, 1.6rem) / 1 var(--font-display);
+  color: #fff;
+}
+
+.side-status {
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.quick-bids {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 12px;
-  align-items: stretch;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
 }
 
-.big-stepper {
-  padding: 4px 8px;
-  border-radius: 20px;
-  border: 1px solid var(--line);
-  background: rgb(255 255 255 / 0.04);
+.bid-btn {
+  appearance: none;
+  min-height: 56px;
+  border-radius: 16px;
+  border: 2px solid var(--team);
+  background: color-mix(in srgb, var(--team) 14%, rgb(255 255 255 / 0.03));
+  color: #fff;
+  font: 800 clamp(1.4rem, 3vw, 2rem) var(--font-display);
+  text-shadow: 0 0 8px var(--team);
+  cursor: pointer;
+  transition: transform 0.1s ease;
 }
 
-.big-stepper .icon-btn {
+.bid-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.bid-btn:disabled {
+  cursor: default;
+}
+
+.bid-stepper {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 52px;
+  gap: 8px;
+  align-items: center;
+}
+
+.bid-stepper .icon-btn {
   width: 52px;
   height: 52px;
+  border: 1px solid var(--line);
+  color: var(--ink);
   font-size: 1.8rem;
 }
 
-.big-stepper output {
-  min-width: 64px;
-  font-size: 2.2rem;
+.doubt-btn {
+  min-height: 56px;
 }
 
 .answer-row {
@@ -170,11 +258,22 @@
     grid-template-rows: minmax(160px, 1fr) auto;
   }
 
-  .bid-row {
-    grid-template-columns: 1fr;
+  .auction-board {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "mid mid" "a b";
   }
 
-  .big-stepper {
-    justify-content: center;
+  .auction-mid {
+    flex-direction: row;
+    gap: 14px;
+  }
+
+  .side-head {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .quick-bids {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

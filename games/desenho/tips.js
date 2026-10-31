@@ -2,7 +2,7 @@
 export const TIPS = {
   ready: [
     { sel: '#who', text: 'Aqui aparece de quem é a vez. Na <b>cor de uma equipe</b>, só ela joga; em <b>laranja</b>, todos jogam.' },
-    { sel: '#cats', text: 'Toque na letra que saiu no dado de categoria (ou 🎲 para sortear). É opcional.' },
+    { sel: '#cats', text: 'Toque na letra que saiu no dado de categoria (ou <b>Sortear</b>). É opcional.' },
     { sel: '.clock', text: 'Pegue a carta e <b>toque no relógio</b>: a rodada começa e o tempo corre. Tocar de novo pausa.' },
     { sel: '#sidebar', text: 'Na lateral ficam as equipes, o botão Todos jogam, o mini tabuleiro e os ajustes.' },
   ],
