@@ -40,6 +40,34 @@ export function mountHowTo(menu) {
   });
 }
 
+// Menu como gaveta lateral que sai da esquerda (o visual está em base.css,
+// em #menu-dialog). Nos jogos com placar no topo, o ☰ vai para o começo do
+// placar e Desfazer / Tela cheia entram na gaveta, liberando espaço no topo.
+export function mountMenuDrawer(menu) {
+  menu.addEventListener('click', (e) => {
+    if (e.target !== menu) return;
+    const r = menu.getBoundingClientRect();
+    if (e.clientX > r.right || e.clientX < r.left || e.clientY < r.top || e.clientY > r.bottom) menu.close(); // toque fora
+  });
+  const hud = $('.hud');
+  if (!hud) return;
+  hud.prepend($('#btn-menu'));
+  const tools = document.createElement('div');
+  tools.className = 'drawer-tools';
+  for (const [id, label] of [
+    ['btn-undo', 'Desfazer'],
+    ['btn-fullscreen', 'Tela cheia'],
+  ]) {
+    const button = document.getElementById(id);
+    if (!button?.classList.contains('hud-btn')) continue;
+    button.className = 'btn drawer-tool';
+    button.innerHTML = `<span aria-hidden="true">${button.textContent}</span>${label}`;
+    button.addEventListener('click', () => menu.close());
+    tools.append(button);
+  }
+  menu.querySelector('h2').after(tools);
+}
+
 export function createShell({
   store,
   settingsKey,
@@ -75,6 +103,7 @@ export function createShell({
   row.insertAdjacentHTML('beforeend', '<button class="btn btn-lg" id="btn-practice" type="button">Rodada de treino</button>');
   $('.hud')?.insertAdjacentHTML('afterbegin', '<span class="practice-badge" id="practice-badge" hidden>Treino</span>');
   mountHowTo($('#menu-dialog'));
+  mountMenuDrawer($('#menu-dialog'));
 
   function show(name) {
     const pre = name !== 'game';

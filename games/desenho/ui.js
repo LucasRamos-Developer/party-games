@@ -17,7 +17,7 @@ import {
 import { createBoardView } from './board.js';
 import { TIPS } from './tips.js';
 import { createPractice } from '../../assets/js/core/practice.js';
-import { mountHowTo } from '../../assets/js/core/shell.js';
+import { mountHowTo, mountMenuDrawer } from '../../assets/js/core/shell.js';
 
 const SAVE_KEY = 'desenho:current';
 const SETUP_KEY = 'desenho:setup';
@@ -58,6 +58,7 @@ const practice = createPractice({
   },
 });
 mountHowTo($('#menu-dialog'));
+mountMenuDrawer($('#menu-dialog'));
 
 const boards = { small: createBoardView($('#board-mini')), large: createBoardView($('#board-large')) };
 const timer = createTimer({ onTick: updateClock, onEnd: () => boomFx($('#screen-game')) });

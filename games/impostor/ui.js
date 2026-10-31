@@ -7,7 +7,7 @@ import { $, esc } from '../../assets/js/core/dom.js';
 import { MAX_PLAYERS, MIN_PLAYERS, impostorCount, newGame, reduce, roundInfo } from './state.js';
 import { TIPS } from './tips.js';
 import { createPractice } from '../../assets/js/core/practice.js';
-import { mountHowTo } from '../../assets/js/core/shell.js';
+import { mountHowTo, mountMenuDrawer } from '../../assets/js/core/shell.js';
 
 const PHONE_KEY = 'impostor:phone';
 const LAST_KEY = 'impostor:last';
@@ -48,6 +48,7 @@ const practice = createPractice({
   },
 });
 mountHowTo($('#menu-dialog'));
+mountMenuDrawer($('#menu-dialog'));
 
 // ---------- navegação ----------
 
