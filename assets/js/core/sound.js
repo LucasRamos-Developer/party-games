@@ -71,6 +71,37 @@ export function success() {
   [523, 659, 784, 1047].forEach((freq, i) => beep({ freq, duration: 0.12, volume: 0.18, when: i * 0.07 }));
 }
 
+// Comemoração: arpejo subindo e acorde final sustentado.
+export function fanfare() {
+  [523, 659, 784, 1047, 784, 1047].forEach((freq, i) => beep({ freq, duration: 0.14, volume: 0.17, when: i * 0.09 }));
+  [523, 659, 784, 1047].forEach((freq) => beep({ freq, duration: 0.9, volume: 0.09, when: 0.6 }));
+}
+
+// Estouro de fogos: ruído curto e agudo, com estalinhos depois.
+export function pop() {
+  const ac = audio();
+  if (!ac) return;
+  const t = ac.currentTime;
+  const length = Math.floor(ac.sampleRate * 0.5);
+  const buffer = ac.createBuffer(1, length, ac.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < length; i++) {
+    const fade = (1 - i / length) ** 3;
+    const crackle = i > length * 0.15 && Math.random() < 0.004 ? 3 : 1;
+    data[i] = (Math.random() * 2 - 1) * fade * crackle;
+  }
+  const noise = ac.createBufferSource();
+  noise.buffer = buffer;
+  const filter = ac.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = 1200 + Math.random() * 1400;
+  const gain = ac.createGain();
+  gain.gain.setValueAtTime(0.5, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+  noise.connect(filter).connect(gain).connect(ac.destination);
+  noise.start(t);
+}
+
 // Pular/passar: dois tons descendo.
 export function skip() {
   [440, 330].forEach((freq, i) => beep({ freq, duration: 0.14, volume: 0.16, when: i * 0.1 }));

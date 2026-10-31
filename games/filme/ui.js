@@ -1,6 +1,7 @@
 import { createStore } from '../../assets/js/core/store.js';
 import { createShell, renderScores } from '../../assets/js/core/shell.js';
-import { buzz, skip, success } from '../../assets/js/core/sound.js';
+import { buzz, skip } from '../../assets/js/core/sound.js';
+import { celebrate } from '../../assets/js/core/fireworks.js';
 import { $, esc } from '../../assets/js/core/dom.js';
 import { FILMES } from './filmes.js';
 import { DEFAULT_SETTINGS, STAGES, newGame, reduce, shownFilms, stagePoints } from './state.js';
@@ -33,12 +34,13 @@ const shell = createShell({
 
 let pending = null; // filme tocado na lista, esperando confirmar o chute
 let query = ''; // texto da busca na lista; limpa a cada filme novo
+let popped = null; // última pista animada: só anima de novo quando a pista muda
 
 store.subscribe((s, action) => {
   if (!s) return;
   pending = null;
   if (action.type === 'next') query = '';
-  if (action.type === 'guess') (s.turn.result === 'hit' ? success : buzz)();
+  if (action.type === 'guess') s.turn.result === 'hit' ? celebrate({ color: s.teams[s.current].color }) : buzz();
   if (action.type === 'clue') skip();
   if (action.type === 'giveUp') buzz();
   if (!screen.hidden) render(s);
@@ -54,7 +56,7 @@ function stageContent(film, stage) {
 }
 
 function resultText(team, t) {
-  if (t.result === 'hit') return `${esc(team.name)} acertou! +${t.points}`;
+  if (t.result === 'hit') return `Ponto para ${esc(team.name)}!`;
   if (t.result === 'miss') return `${esc(team.name)} chutou <b>${esc(FILMES[t.guess].titulo)}</b> e zerou`;
   return `${esc(team.name)} não pontuou`;
 }
@@ -80,9 +82,12 @@ function render(s) {
 
     if (s.phase === 'play') {
       // Etapas já abertas ficam visíveis, a atual em destaque.
+      const key = `${s.turnCount}:${t.stage}`;
+      const pop = popped === key ? '' : 'pop';
+      popped = key;
       const opened = Array.from({ length: t.stage + 1 }, (_, i) => i)
         .reverse()
-        .map((i) => `<div class="stage-card ${i === t.stage ? 'word-card pop' : 'is-old'}">${i === t.stage ? '' : `<span class="stage-num">Pista ${i + 1}</span>`}${stageContent(film, i)}</div>`)
+        .map((i) => `<div class="stage-card ${i === t.stage ? `word-card ${pop}` : 'is-old'}">${i === t.stage ? '' : `<span class="stage-num">Pista ${i + 1}</span>`}${stageContent(film, i)}</div>`)
         .join('');
       const options = shownFilms(t)
         .sort(byTitle)
@@ -91,11 +96,15 @@ function render(s) {
       const confirm =
         pending === null
           ? ''
-          : `<div class="guess-confirm pop">
-              <p>Chutar <b>${esc(FILMES[pending].titulo)}</b>? Se errar, zera.</p>
-              <div class="duo">
-                <button class="neon-btn" type="button" data-act="cancel">Cancelar</button>
-                <button class="neon-btn is-ok" type="button" data-act="confirm">Confirmar · ${stagePoints(t.stage)} pts</button>
+          : `<div class="modal-backdrop" data-act="cancel">
+              <div class="guess-confirm pop" role="dialog" aria-modal="true" aria-labelledby="guess-title">
+                <p class="who-kicker">Confirmar o chute</p>
+                <h2 class="guess-title" id="guess-title">${esc(FILMES[pending].titulo)}</h2>
+                <p class="guess-warn">Valendo <b>${stagePoints(t.stage)}</b> pontos. Se errar, zera!</p>
+                <div class="duo">
+                  <button class="neon-btn" type="button" data-act="cancel">Cancelar</button>
+                  <button class="neon-btn is-ok" type="button" data-act="confirm">Confirmar</button>
+                </div>
               </div>
             </div>`;
       const last = t.stage === STAGES - 1;
@@ -124,8 +133,10 @@ function render(s) {
     play.innerHTML = `
       ${top}
       <div class="handoff">
+        ${t.result === 'hit' ? '<p class="hit-banner">Acertou!</p>' : ''}
         <p class="who-kicker">O filme era</p>
         <h2 class="who-title title-reveal pop">${esc(film.titulo)}</h2>
+        ${t.result === 'hit' ? `<p class="hit-points">+${t.points} pontos</p>` : ''}
         <p class="review-total">${resultText(team, t)}</p>
         <button class="neon-btn is-ok big-cta" type="button" data-act="next">Próximo filme ›</button>
       </div>`;
@@ -149,6 +160,13 @@ function render(s) {
     </div>`;
 }
 
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && pending !== null) {
+    pending = null;
+    render(store.state);
+  }
+});
+
 // Filtra só escondendo itens, sem redesenhar: o campo não perde o foco.
 play.addEventListener('input', (e) => {
   if (!e.target.matches('.film-search')) return;
@@ -171,7 +189,9 @@ play.addEventListener('click', (e) => {
     shell.tips(store.state);
     return;
   }
-  const act = e.target.closest('[data-act]')?.dataset.act;
+  // Toque dentro da caixa da modal (fora dos botões) não fecha.
+  const box = e.target.closest('.guess-confirm');
+  const act = e.target.closest(box ? '.guess-confirm [data-act]' : '[data-act]')?.dataset.act;
   if (act === 'confirm' && pending !== null) store.dispatch({ type: 'guess', film: pending });
   if (act === 'cancel') {
     pending = null;

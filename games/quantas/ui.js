@@ -2,7 +2,8 @@ import { createStore } from '../../assets/js/core/store.js';
 import { createShell, renderScores } from '../../assets/js/core/shell.js';
 import { createTimer } from '../../assets/js/core/timer.js';
 import { boom, mountClock } from '../../assets/js/core/clock.js';
-import { beep, buzz, success } from '../../assets/js/core/sound.js';
+import { beep, buzz } from '../../assets/js/core/sound.js';
+import { celebrate } from '../../assets/js/core/fireworks.js';
 import { freshRng } from '../../assets/js/core/random.js';
 import { $, esc } from '../../assets/js/core/dom.js';
 import { QUESTIONS } from './words.js';
@@ -111,7 +112,7 @@ function syncTimers(s, action) {
 store.subscribe((s, action) => {
   if (!s) return;
   if (action.type === 'count') {
-    if (s.phase === 'result') success();
+    if (s.phase === 'result') celebrate({ color: s.teams[s.round.answerer].color });
     else beep({ freq: 880, duration: 0.08 });
   }
   if (action.type === 'fail') buzz();

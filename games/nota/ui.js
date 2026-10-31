@@ -1,7 +1,8 @@
 import { createStore } from '../../assets/js/core/store.js';
 import { createShell, renderScores } from '../../assets/js/core/shell.js';
 import { randomInt } from '../../assets/js/core/dice.js';
-import { buzz, success } from '../../assets/js/core/sound.js';
+import { buzz } from '../../assets/js/core/sound.js';
+import { celebrate } from '../../assets/js/core/fireworks.js';
 import { $, esc } from '../../assets/js/core/dom.js';
 import { THEMES, question } from './words.js';
 import { TIPS } from './tips.js';
@@ -41,7 +42,7 @@ const shell = createShell({
 
 store.subscribe((s, action) => {
   if (!s) return;
-  if (action.type === 'guess') (s.turn.hit ? success : buzz)();
+  if (action.type === 'guess') s.turn.hit ? celebrate({ color: s.teams[s.current].color }) : buzz();
   if (action.type === 'next' || action.type === '@undo') peek = 'closed';
   if (!screen.hidden) render(s);
 });

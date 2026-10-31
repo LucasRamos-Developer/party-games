@@ -571,6 +571,49 @@ body.is-busy .game button {
   animation: quake 0.45s linear 2;
 }
 
+/* ---------- comemoração de acerto ---------- */
+
+.fireworks {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.hit-banner {
+  margin: 0;
+  font: 800 clamp(2.6rem, 9vw, 6rem) / 1 var(--font-display);
+  color: #ffd23f;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-shadow: 0 0 14px #ffd23f, 0 0 50px #ff8a00;
+  animation: hit-in 0.7s cubic-bezier(0.2, 1.6, 0.4, 1) both, hit-glow 1.2s ease-in-out 0.7s infinite alternate;
+}
+
+.hit-points {
+  margin: 0;
+  font: 800 clamp(2rem, 6vw, 3.6rem) / 1 var(--font-display);
+  color: #2bff88;
+  text-shadow: 0 0 12px #2bff88, 0 0 40px #2bff88;
+  animation: hit-in 0.6s cubic-bezier(0.2, 1.6, 0.4, 1) 0.25s both;
+}
+
+@keyframes hit-in {
+  from {
+    transform: scale(0.2) rotate(-8deg);
+    opacity: 0;
+  }
+}
+
+@keyframes hit-glow {
+  to {
+    transform: scale(1.06);
+    text-shadow: 0 0 22px #ffd23f, 0 0 80px #ff8a00;
+  }
+}
+
 /* ---------- diálogos ---------- */
 
 .setting-row {
