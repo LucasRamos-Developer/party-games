@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/base.css">
+  <script type="module" src="assets/js/hub.js"></script>
 </head>
 <body>
   <main class="container">
@@ -17,6 +18,15 @@
       <h1>Party <span class="brand"><span>Games</span></span></h1>
       <p class="muted">Tabuleiros, dados e timers para jogar com a galera, direto no navegador.</p>
     </header>
+
+    <section class="card stack hub-teams" id="hub-teams" hidden>
+      <div class="row between wrap">
+        <h2>Placar das equipes</h2>
+        <button class="btn btn-ghost" id="btn-clear-teams" type="button">Limpar equipes</button>
+      </div>
+      <ul class="hub-team-list" id="hub-team-list"></ul>
+      <p class="muted">Soma dos pontos de todas as partidas dos jogos em equipe (a rodada de treino não conta).</p>
+    </section>
 
     <div class="hub-grid">
       <a class="card game-card" href="games/desenho/">
@@ -81,5 +91,14 @@
       </a>
     </div>
   </main>
+
+  <dialog id="clear-dialog">
+    <form method="dialog" class="stack">
+      <h2>Limpar as equipes?</h2>
+      <p class="muted">Apaga os jogadores, as equipes, o placar geral e as partidas em andamento. Não dá para desfazer.</p>
+      <button class="btn btn-danger" value="clear">Limpar tudo</button>
+      <button class="btn btn-ghost" value="cancel">Cancelar</button>
+    </form>
+  </dialog>
 </body>
 </html>

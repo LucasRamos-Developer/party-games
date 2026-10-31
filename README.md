@@ -47,6 +47,7 @@ assets/css/base.css         tema escuro neon e componentes comuns
 assets/css/game.css         kit dos jogos: vidro, relógio, botões, placar, explosão
 assets/js/core/
   storage.js                persistência (localStorage hoje)
+  ledger.js                 placar geral das equipes (soma das partidas, mostrado na central)
   store.js                  estado da partida com desfazer e salvamento
   shell.js                  setup/retomada/menu/placar dos jogos em equipe
   teams-setup.js            cadastro de jogadores e divisão em equipes

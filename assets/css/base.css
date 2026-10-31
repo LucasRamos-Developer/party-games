@@ -622,6 +622,73 @@ dialog::backdrop {
   font-size: clamp(2rem, 6vw, 3rem);
 }
 
+/* placar geral das equipes */
+.hub-teams {
+  margin-top: 16px;
+}
+
+.hub-team-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hub-team {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "name score" "players score";
+  align-items: center;
+  gap: 2px 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--team);
+  background: color-mix(in srgb, var(--team) 10%, var(--surface));
+}
+
+.hub-team-name {
+  grid-area: name;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+}
+
+.hub-team-name .dot {
+  background: var(--team);
+}
+
+.hub-team-players {
+  grid-area: players;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+
+.hub-team-score {
+  grid-area: score;
+  font: 800 2rem / 1 var(--font-display);
+  color: var(--team);
+}
+
+.hub-team-score small {
+  font-size: 0.9rem;
+  color: var(--ink-2);
+}
+
+.hub-lead {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #ffd23f;
+  color: #1a0f00;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 .hub-grid {
   display: grid;
   gap: 16px;

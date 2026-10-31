@@ -5,6 +5,7 @@
 import { storage } from './storage.js';
 import { mountTeamsSetup } from './teams-setup.js';
 import { createPractice } from './practice.js';
+import { recordMatch } from './ledger.js';
 import { $, esc } from './dom.js';
 
 const PLAYERS_KEY = 'players'; // compartilhado entre os jogos da central
@@ -131,6 +132,7 @@ export function createShell({
   function startGame(teams, settings, { practice: isPractice = false } = {}) {
     practice.reset();
     const state = newGame({ teams, settings });
+    state.matchId = Date.now().toString(36); // identifica a partida no placar geral
     if (isPractice) state.practice = true;
     store.start(state);
     enterGame();
@@ -176,6 +178,7 @@ export function createShell({
   store.subscribe((s, action, prev) => {
     const undo = $('#btn-undo');
     if (undo) undo.disabled = !store.canUndo;
+    recordMatch(settingsKey.split(':')[0], s);
     if (!s || $('#screen-game').hidden) return;
     $('#practice-badge').hidden = !s.practice;
     practice.after(s);

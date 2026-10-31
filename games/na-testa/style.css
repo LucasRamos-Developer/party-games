@@ -9,6 +9,7 @@
 
 .game.is-forehead .play-area > * {
   width: 100%;
+  max-width: none;
 }
 
 .forehead {
