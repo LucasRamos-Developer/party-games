@@ -106,7 +106,7 @@ function syncTimers(s, action) {
   } else {
     for (const key of SIDES) bids[key].timer.pause();
   }
-  if (s.phase !== 'answer' || action.type === 'timeout' || action.type === 'pass') answerTimer.reset(s.settings.timer);
+  if (s.phase !== 'answer' || ['timeout', 'pass', '@enter'].includes(action.type)) answerTimer.reset(s.settings.timer);
 }
 
 store.subscribe((s, action) => {
