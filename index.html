@@ -19,14 +19,18 @@
       <p class="muted">Tabuleiros, dados e timers para jogar com a galera, direto no navegador.</p>
     </header>
 
-    <section class="card stack hub-teams" id="hub-teams" hidden>
+    <section class="card stack hub-teams" id="hub-teams">
       <div class="row between wrap">
-        <h2>Placar das equipes</h2>
-        <button class="btn btn-ghost" id="btn-clear-teams" type="button">Limpar equipes</button>
+        <h2>Equipes</h2>
+        <div class="row wrap">
+          <button class="btn" id="btn-manage-teams" type="button" aria-expanded="false" aria-controls="hub-manager">Gerenciar equipes</button>
+          <button class="btn btn-ghost" id="btn-clear-teams" type="button">Limpar equipes</button>
+        </div>
       </div>
       <ul class="hub-team-list" id="hub-team-list"></ul>
-      <p class="muted">Soma dos pontos de todas as partidas dos jogos em equipe (a rodada de treino não conta).</p>
+      <p class="muted" id="hub-teams-note"></p>
     </section>
+    <div class="setup-grid hub-manager" id="hub-manager" hidden></div>
 
     <div class="hub-grid">
       <a class="card game-card" href="games/desenho/">

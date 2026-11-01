@@ -66,6 +66,50 @@ export function explosion() {
   boom.stop(t + 1);
 }
 
+// Sirene de fim de tempo: sobe e desce em ciclos de 1 s. Só uma toca por vez.
+let sirenStop = null;
+
+export function siren({ duration = 6, volume = 0.3 } = {}) {
+  const ac = audio();
+  if (!ac) return;
+  stopSiren();
+  const t = ac.currentTime;
+  const osc = ac.createOscillator();
+  const filter = ac.createBiquadFilter();
+  const gain = ac.createGain();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(550, t);
+  for (let i = 0; i < duration; i++) {
+    osc.frequency.linearRampToValueAtTime(1150, t + i + 0.5);
+    osc.frequency.linearRampToValueAtTime(550, t + i + 1);
+  }
+  filter.type = 'lowpass';
+  filter.frequency.value = 2400;
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(volume, t + 0.15);
+  gain.gain.setValueAtTime(volume, t + duration - 0.5);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+  osc.connect(filter).connect(gain).connect(ac.destination);
+  osc.start(t);
+  osc.stop(t + duration + 0.02);
+  const stop = () => {
+    const now = ac.currentTime;
+    gain.gain.cancelScheduledValues(now);
+    gain.gain.setValueAtTime(Math.max(gain.gain.value, 0.0001), now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+    osc.stop(now + 0.1);
+  };
+  sirenStop = stop;
+  osc.onended = () => {
+    if (sirenStop === stop) sirenStop = null;
+  };
+}
+
+export function stopSiren() {
+  sirenStop?.();
+  sirenStop = null;
+}
+
 // Acerto: arpejo curto subindo.
 export function success() {
   [523, 659, 784, 1047].forEach((freq, i) => beep({ freq, duration: 0.12, volume: 0.18, when: i * 0.07 }));

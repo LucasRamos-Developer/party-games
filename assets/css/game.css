@@ -829,7 +829,7 @@ body.is-busy .game button {
    passar por baixo dela. No celular em pé a pílula ainda reserva o topo. */
 @media (min-width: 700px) {
   .game {
-    --hud-space: 220px;
+    --hud-space: 270px;
   }
 
   .play-area {
@@ -839,6 +839,77 @@ body.is-busy .game button {
   .play-area > :first-child {
     max-width: calc(100% - 2 * var(--hud-space));
   }
+}
+
+/* Tablet em pé: sobra altura e falta largura, então o jogo começa abaixo da pílula. */
+@media (min-width: 700px) and (max-width: 999px) and (min-height: 600px) {
+  .play-area {
+    top: calc(max(10px, env(safe-area-inset-top)) + 72px);
+  }
+
+  .play-area > :first-child {
+    max-width: none;
+  }
+}
+
+#hud-teams .score-pill {
+  cursor: pointer;
+}
+
+/* diálogo para ver quem está em cada equipe */
+.teams-view {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 60dvh;
+  overflow-y: auto;
+}
+
+.teams-view-item {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--team) 45%, transparent);
+  background: color-mix(in srgb, var(--team) 8%, transparent);
+}
+
+.teams-view-item.is-active {
+  border: 2px solid var(--team);
+}
+
+.teams-view-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.teams-view-head b {
+  flex: 1;
+  min-width: 0;
+}
+
+.teams-view-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.teams-view-players li {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.06);
+  font-weight: 700;
+}
+
+.teams-view-players .is-current {
+  background: var(--team);
+  color: #07060f;
 }
 
 /* tela "passe o aparelho para…" */

@@ -1,22 +1,20 @@
-// Central: quando já tem equipes cadastradas, mostra o placar geral (soma das
-// partidas de todos os jogos) e o botão para limpar as equipes.
+// Central: mostra as equipes com o placar geral (soma das partidas de todos os
+// jogos) e abre o cadastro, que salva sozinho a cada mudança.
 
 import { storage } from './core/storage.js';
 import { clearLedger, totalFor, totals } from './core/ledger.js';
+import { mountSavedTeams, PLAYERS_KEY } from './core/teams-setup.js';
 import { $, esc } from './core/dom.js';
 
-const box = $('#hub-teams');
+const manager = $('#hub-manager');
+const manageBtn = $('#btn-manage-teams');
 const dialog = $('#clear-dialog');
 
 async function render() {
-  const saved = await storage.load('players');
+  const saved = await storage.load(PLAYERS_KEY);
   const players = saved?.players ?? [];
-  if (!players.length) {
-    box.hidden = true;
-    return;
-  }
   const all = await totals();
-  const teams = (saved.teams ?? [])
+  const teams = (saved?.teams ?? [])
     .map((t, i) => ({ ...t, players: players.filter((p) => p.team === i).map((p) => p.name), ...totalFor(all, t.name) }))
     .filter((t) => t.players.length)
     .sort((a, b) => b.score - a.score);
@@ -31,8 +29,22 @@ async function render() {
       </li>`,
     )
     .join('');
-  box.hidden = false;
+  $('#hub-teams-note').textContent = teams.length
+    ? 'Pontos somados de todas as partidas dos jogos em equipe (a rodada de treino não conta).'
+    : 'Cadastre os jogadores e monte as equipes aqui: fica salvo para todos os jogos.';
+  $('#btn-clear-teams').hidden = !players.length;
+  return players.length;
 }
+
+const mountManager = () => mountSavedTeams(manager, { onChange: render, onRename: render });
+
+function setManagerOpen(open) {
+  manager.hidden = !open;
+  manageBtn.setAttribute('aria-expanded', String(open));
+  manageBtn.textContent = open ? 'Fechar cadastro' : 'Gerenciar equipes';
+}
+
+manageBtn.addEventListener('click', () => setManagerOpen(manager.hidden));
 
 $('#btn-clear-teams').addEventListener('click', () => {
   dialog.returnValue = '';
@@ -43,8 +55,11 @@ $('#btn-clear-teams').addEventListener('click', () => {
 dialog.addEventListener('close', async () => {
   if (dialog.returnValue !== 'clear') return;
   const current = (await storage.list()).filter((k) => k.endsWith(':current'));
-  await Promise.all([storage.remove('players'), clearLedger(), ...current.map((k) => storage.remove(k))]);
+  await Promise.all([storage.remove(PLAYERS_KEY), clearLedger(), ...current.map((k) => storage.remove(k))]);
+  await mountManager();
+  setManagerOpen(true);
   render();
 });
 
-render();
+await mountManager();
+setManagerOpen(!(await render()));

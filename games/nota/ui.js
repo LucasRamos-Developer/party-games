@@ -17,6 +17,7 @@ const randomNota = () => randomInt(11);
 let peek = 'closed';
 
 const shell = createShell({
+  currentPlayer: holderOf,
   store,
   settingsKey: 'nota:setup',
   tips: TIPS,

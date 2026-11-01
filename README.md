@@ -8,7 +8,7 @@ continua na mesa (cartas, papel e caneta).
 
 | Jogo | Pasta | Como se joga |
 |---|---|---|
-| **Rabisco & Adivinha** | `games/desenho/` | Desenho ou mímica em equipes. O timer é a tela principal; marca categoria, quem acertou e casas; dados virtuais e tabuleiro opcionais. |
+| **Rabisco & Adivinha** | `games/desenho/` | Desenho ou mímica em equipes: o app diz a única pessoa que faz, e em "Todos jogam" todas as equipes adivinham. O timer é a tela principal; marca categoria, quem acertou e casas. Com dados virtuais, categoria e número rolam juntos numa modal antes da rodada; tabuleiro opcional. |
 | **Fala Sem Falar** | `games/fala-sem-falar/` | Explicar a palavra sem dizer as 4 proibidas. Um tablet, timer com bomba, revisão do turno e meta de pontos. |
 | **Na Testa** | `games/na-testa/` | Celular na testa: inclinar para baixo = acertou, para cima = passa (ou tocar na tela). 8 categorias. |
 | **Impostor** | `games/impostor/` | Todos têm a mesma palavra, menos o impostor. Um aparelho passando de mão em mão, ou **cada um no seu celular** com código de sala (sorteio com semente, sem servidor). |
@@ -16,6 +16,8 @@ continua na mesa (cartas, papel e caneta).
 | **Que Filme É Esse?** | `games/filme/` | 50 filmes; 5 pistas do mais difícil ao mais fácil (10, 8, 6, 4, 2 pontos). O chute é tocando na lista ao lado, que encolhe a cada pista (50 → 10) mantendo os filmes mais parecidos; errou, zera. Aceita imagens próprias em `games/filme/frames/`. |
 | **Quantas Palavras?** | `games/quantas/` | Leilão de respostas: um jogador de cada equipe; um lado da tela por equipe, lances sugeridos (próximo número e de 5 em 5) + seletor −/+, um relógio por equipe que só corre na vez dela (zerou, responde); "Duvido!" obriga o adversário a cumprir o lance; quem ganha tem 1min30 para falar a quantidade prometida. Modo invertido, sorteio aleatório ou escolhido, nível Fácil/Misto/Desafio. |
 | **Tela de Espera** | `games/espera/` | Para deixar na TV enquanto o pessoal chega. A mensagem se escreve direto na tela; os jogadores cadastrados e os convidados (adicionados no menu) viram monstros no cemitério. Tema Halloween: lanterna que segue o mouse, lampião que acende a luz, morcegos que fogem, janelas, aranha, abóbora e raio na lua. |
+
+As equipes podem ser montadas na central ou no setup de qualquer jogo (nomes, cores e arrastar jogadores): cada mudança é salva na hora e vale para todos os jogos. Durante o jogo, o botão 👥 mostra quem está em cada equipe.
 
 Todos os jogos têm **Como jogar** (no setup e no menu) e uma **rodada de treino**: uma rodada que não vale ponto, com balões explicando cada botão na hora (`assets/js/core/coach.js` e `practice.js`).
 
@@ -48,11 +50,11 @@ assets/css/base.css         tema escuro neon e componentes comuns
 assets/css/game.css         kit dos jogos: vidro, relógio, botões, placar, explosão
 assets/js/core/
   storage.js                persistência (localStorage hoje)
-  ledger.js                 placar geral das equipes (soma das partidas, mostrado na central)
+  ledger.js                 placar geral das equipes (soma por nome; renomear leva os pontos junto)
   store.js                  estado da partida com desfazer e salvamento
-  shell.js                  setup/retomada/menu/placar dos jogos em equipe
-  teams-setup.js            cadastro de jogadores e divisão em equipes
-  timer.js, clock.js        timer com alerta de bomba e relógio em anel
+  shell.js                  setup/retomada/menu/placar dos jogos em equipe e diálogo "ver equipes"
+  teams-setup.js            cadastro de jogadores e equipes, com salvamento automático
+  timer.js, clock.js        timer com alerta de bomba, sirene no fim e relógio em anel
   sound.js                  sons sintetizados (WebAudio)
   random.js, deck.js        sorteio com semente e baralho sem repetição
   turns.js                  fila de vezes e desempate

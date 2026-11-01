@@ -30,4 +30,27 @@ export async function totals() {
 
 export const totalFor = (all, name) => all[norm(name)] ?? { score: 0, matches: 0 };
 
+// O placar soma por nome: renomear leva junto os pontos e as partidas em andamento.
+export async function renameTeam(from, to) {
+  if (norm(from) === norm(to)) return;
+  const rename = (teams) => {
+    for (const t of teams ?? []) if (norm(t.name) === norm(from)) t.name = to;
+  };
+  const ledger = await storage.load(KEY);
+  if (ledger) {
+    Object.values(ledger).forEach(rename);
+    await storage.save(KEY, ledger);
+  }
+  const current = (await storage.list()).filter((k) => k.endsWith(':current'));
+  await Promise.all(
+    current.map(async (key) => {
+      const game = await storage.load(key);
+      if (!game) return;
+      rename(game.state?.teams);
+      for (const past of game.history ?? []) rename(past.teams);
+      await storage.save(key, game);
+    }),
+  );
+}
+
 export const clearLedger = () => storage.remove(KEY);

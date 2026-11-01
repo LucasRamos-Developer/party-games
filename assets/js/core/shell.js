@@ -3,12 +3,11 @@
 // esperado está nos index.html dos jogos (ids screen-*, teams-setup, btn-*…).
 
 import { storage } from './storage.js';
-import { mountTeamsSetup } from './teams-setup.js';
+import { mountSavedTeams } from './teams-setup.js';
 import { createPractice } from './practice.js';
 import { recordMatch } from './ledger.js';
 import { $, esc } from './dom.js';
 
-const PLAYERS_KEY = 'players'; // compartilhado entre os jogos da central
 const PRE_SCREENS = ['loading', 'resume', 'setup'];
 
 export const teamTag = (t) => `<span class="team-tag" style="--team:${t.color}"><span class="dot"></span>${esc(t.name)}</span>`;
@@ -16,11 +15,39 @@ export const teamTag = (t) => `<span class="team-tag" style="--team:${t.color}">
 export function renderScores(el, teams, activeId) {
   el.innerHTML = teams
     .map(
-      (t) => `<li class="score-pill ${t.id === activeId ? 'is-active' : ''}" style="--team:${t.color}">
+      (t) => `<li class="score-pill ${t.id === activeId ? 'is-active' : ''}" data-team="${t.id}" style="--team:${t.color}">
         <span class="dot"></span><span class="score-name">${esc(t.name)}</span><b>${t.score}</b>
       </li>`,
     )
     .join('');
+}
+
+// Diálogo para ver quem está em cada equipe durante o jogo; devolve a função
+// que o abre. Em `currentPlayer` o jogo diz quem está com a vez na equipe ativa.
+export function mountTeamsDialog({ teams, activeId = () => null, info = (t) => `${t.score} pts`, currentPlayer = () => null }) {
+  const dialog = document.createElement('dialog');
+  dialog.id = 'teams-dialog';
+  document.body.append(dialog);
+  return () => {
+    const active = activeId();
+    const list = teams()
+      .map((t) => {
+        const current = t.id === active ? currentPlayer(t) : null;
+        return `<li class="teams-view-item ${t.id === active ? 'is-active' : ''}" style="--team:${t.color}">
+          <div class="teams-view-head"><span class="dot"></span><b>${esc(t.name)}</b><span class="muted">${esc(info(t))}</span></div>
+          <ul class="teams-view-players">
+            ${t.players.map((p) => `<li class="${p === current ? 'is-current' : ''}">${esc(p)}</li>`).join('')}
+          </ul>
+        </li>`;
+      })
+      .join('');
+    dialog.innerHTML = `<form method="dialog" class="stack">
+      <h2>Equipes</h2>
+      <ul class="teams-view">${list}</ul>
+      <button class="btn btn-primary" value="ok">Fechar</button>
+    </form>`;
+    dialog.showModal();
+  };
 }
 
 // Diálogo "Como jogar" com o mesmo texto do card do setup.
@@ -80,6 +107,7 @@ export function createShell({
   tips = {},
   tipKey,
   onTips,
+  currentPlayer,
   practiceDone = (action) => action.type === 'confirm' || action.type === 'next',
   summary = (s) =>
     s.teams.map((t) => `<li>${teamTag(t)} <span class="muted">${t.score} pts · ${t.players.map(esc).join(', ')}</span></li>`).join(''),
@@ -106,6 +134,19 @@ export function createShell({
   mountHowTo($('#menu-dialog'));
   mountMenuDrawer($('#menu-dialog'));
 
+  // Botão para ver as equipes ao lado do placar (a pílula também abre).
+  const openTeams = mountTeamsDialog({
+    teams: () => store.state?.teams ?? [],
+    activeId: () => {
+      const id = $('#hud-teams .is-active')?.dataset.team;
+      return id === undefined ? null : Number(id);
+    },
+    currentPlayer,
+  });
+  $('#hud-teams').insertAdjacentHTML('afterend', '<button class="hud-btn" id="btn-teams" type="button" title="Ver equipes" aria-label="Ver equipes">👥</button>');
+  $('#btn-teams').addEventListener('click', openTeams);
+  $('#hud-teams').addEventListener('click', openTeams);
+
   function show(name) {
     const pre = name !== 'game';
     $('#screen-pre').hidden = !pre;
@@ -115,10 +156,9 @@ export function createShell({
   }
 
   async function enterSetup() {
-    const [saved, players] = await Promise.all([storage.load(settingsKey), storage.load(PLAYERS_KEY)]);
-    writeOptions(saved ?? {});
+    writeOptions((await storage.load(settingsKey)) ?? {});
     $('#setup-error').textContent = '';
-    setup = mountTeamsSetup($('#teams-setup'), { initial: players ?? {}, minPerTeam });
+    setup = await mountSavedTeams($('#teams-setup'), { minPerTeam });
     show('setup');
   }
 
@@ -154,7 +194,7 @@ export function createShell({
       return;
     }
     const settings = readOptions();
-    await Promise.all([storage.save(PLAYERS_KEY, result.snapshot), storage.save(settingsKey, settings)]);
+    await storage.save(settingsKey, settings);
     startGame(result.teams, settings, opts);
   }
 

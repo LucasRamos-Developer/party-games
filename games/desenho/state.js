@@ -102,8 +102,9 @@ export function reduce(prev, action) {
   const name = (id) => s.teams[id].name;
 
   switch (action.type) {
-    // Começa a rodada. A categoria é opcional (o dado pode ser o físico) e
-    // `all` força "todos jogam" numa casa comum.
+    // Começa a rodada. A categoria é opcional (o dado pode ser o físico), `all`
+    // força "todos jogam" numa casa comum e `roll` traz as casas já tiradas no
+    // dado virtual.
     case 'start': {
       if (s.phase !== 'ready') return prev;
       let type = roundTypeFor(s, s.current);
@@ -115,6 +116,7 @@ export function reduce(prev, action) {
         starter: s.current,
         participants: type === 'normal' ? [s.current] : s.teams.map((t) => t.id),
         category,
+        roll: action.roll ?? null,
         tie: false,
       };
       if (category) s.lastCategory = category;
@@ -131,7 +133,7 @@ export function reduce(prev, action) {
       if (s.phase !== 'drawing') return prev;
       const r = s.round;
       const winners = [...new Set(action.winners)].filter((id) => r.participants.includes(id));
-      for (const id of r.participants) s.teams[id].drawerIdx++;
+      s.teams[r.starter].drawerIdx++; // só a equipe da vez tem quem desenha ou faz a mímica
 
       if (winners.length === 0) {
         s.current = nextTeam(s, r.starter);

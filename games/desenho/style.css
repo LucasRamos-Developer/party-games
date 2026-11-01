@@ -426,6 +426,10 @@
   cursor: pointer;
 }
 
+.side-btn-wide {
+  grid-column: 1 / -1;
+}
+
 .side-btn span {
   font-size: 1.25rem;
   line-height: 1.2;
@@ -454,7 +458,123 @@
   cursor: pointer;
 }
 
+/* Equipes sempre à mão quando a lateral está recolhida */
+.teams-fab {
+  display: none;
+  position: absolute;
+  top: 68px;
+  right: 12px;
+  z-index: 30;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: var(--ink);
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+body.side-open .teams-fab {
+  display: none;
+}
+
 /* ---------- diálogos ---------- */
+
+/* modal dos dois dados: categoria e número */
+#dice-dialog {
+  width: min(560px, calc(100vw - 32px));
+}
+
+.dice-who {
+  text-align: center;
+}
+
+.dice-who .who-kicker {
+  margin: 0 0 4px;
+}
+
+.dice-who h2 {
+  font-size: clamp(1.5rem, 5vmin, 2.2rem);
+}
+
+.dice-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.dice-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.dice-slot .big-die {
+  --d: clamp(104px, 26vmin, 180px);
+}
+
+.big-die.die-letter {
+  display: grid;
+  grid-template: 1fr / 1fr;
+  color: #07060f;
+  font: 800 calc(var(--d) * 0.6) / 1 var(--font-display);
+}
+
+.dice-label {
+  margin: 0;
+  min-height: 2.6em;
+  text-align: center;
+  font-weight: 800;
+}
+
+.dice-choice {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+}
+
+.dice-choice .cat {
+  width: auto;
+  min-width: 0;
+  min-height: 56px;
+}
+
+/* celular deitado: a modal cabe inteira sem rolar */
+@media (max-height: 480px) {
+  #dice-dialog {
+    padding: 12px 20px;
+  }
+
+  #dice-dialog form {
+    gap: 8px;
+  }
+
+  .dice-pair .dice-slot {
+    gap: 6px;
+  }
+
+  .dice-slot .big-die {
+    --d: 72px;
+  }
+
+  .dice-label {
+    min-height: 0;
+  }
+
+  .dice-choice .cat {
+    min-height: 36px;
+  }
+
+  .dice-choice .cat small {
+    display: none;
+  }
+
+  #btn-dice-go {
+    min-height: 44px;
+  }
+}
 
 .stepper .icon-btn,
 .adjust-item .icon-btn {
@@ -512,7 +632,8 @@
     transform: none;
   }
 
-  .side-toggle {
+  .side-toggle,
+  .teams-fab {
     display: grid;
     place-items: center;
   }
@@ -560,7 +681,7 @@
   }
 
   .who {
-    padding: 0;
+    padding: 0 56px;
   }
 
   .neon-btn {

@@ -1,10 +1,12 @@
 // Timer (ampulheta) com aviso sonoro nos últimos segundos e wake lock para a
 // tela não apagar enquanto está rodando.
 
-import { audio, explosion, tick } from './sound.js';
+import { audio, explosion, siren, stopSiren, tick } from './sound.js';
 
 // Nos últimos `warnAt` segundos toca um tique por segundo; nos últimos
-// `fastAt`, dois por segundo. No zero, explode.
+// `fastAt`, dois por segundo. No zero, explode e toca a sirene, que só para
+// sozinha ou quando um timer começa a correr (reset não corta: vários jogos
+// chamam reset logo ao zerar).
 export function createTimer({
   duration = 60,
   warnAt = 10,
@@ -54,7 +56,10 @@ export function createTimer({
     }
     if (remaining <= 0) {
       stop();
-      if (sound) explosion();
+      if (sound) {
+        explosion();
+        siren();
+      }
       onTick(remaining, total);
       onEnd();
       return;
@@ -67,6 +72,7 @@ export function createTimer({
       if (interval) return;
       if (remaining <= 0) remaining = total;
       audio(); // libera o áudio dentro do gesto do usuário
+      stopSiren();
       endAt = performance.now() + remaining;
       lastBeat = Math.ceil(remaining / 500);
       interval = setInterval(update, 50);

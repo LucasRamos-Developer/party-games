@@ -27,6 +27,7 @@ $('#opt-categories').innerHTML = CATEGORIES.map(
 ).join('');
 
 const shell = createShell({
+  currentPlayer: holderOf,
   store,
   settingsKey: 'testa:setup',
   tips: TIPS,

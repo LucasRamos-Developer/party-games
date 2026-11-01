@@ -3,15 +3,18 @@
 
 import { esc } from './dom.js';
 import { randomInt } from './dice.js';
+import { storage } from './storage.js';
+import { renameTeam } from './ledger.js';
 
 export const TEAM_COLORS = ['#ff2e88', '#00e5ff', '#39ff14', '#b14cff'];
+export const PLAYERS_KEY = 'players'; // compartilhado entre os jogos da central
 
 let seq = 0;
 const uid = () => `p${++seq}`;
 const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
 
 export function mountTeamsSetup(root, options = {}) {
-  const { minTeams = 2, maxTeams = 4, minPerTeam = 2 } = options;
+  const { minTeams = 2, maxTeams = 4, minPerTeam = 2, onChange = () => {}, onRename = () => {} } = options;
   const saved = options.initial ?? {};
   // Montar de novo (voltar ao setup) desliga os ouvintes da montagem anterior.
   root.unmountTeams?.();
@@ -114,6 +117,24 @@ export function mountTeamsSetup(root, options = {}) {
     renderTeams();
   }
 
+  const teamResult = () =>
+    state.teams.slice(0, state.count).map((t, i) => ({
+      name: t.name.trim() || `Equipe ${i + 1}`,
+      color: t.color,
+      players: membersOf(i).map((p) => p.name),
+    }));
+
+  const snapshot = () => ({
+    players: state.players.map(({ name, team }) => ({ name, team })),
+    teams: teamResult().map(({ name, color }) => ({ name, color })),
+  });
+
+  // Toda mudança nas equipes passa por aqui (a montagem inicial não).
+  function changed() {
+    render();
+    onChange(snapshot());
+  }
+
   on(ref('form'), 'submit', (e) => {
     e.preventDefault();
     const input = ref('name');
@@ -127,7 +148,7 @@ export function mountTeamsSetup(root, options = {}) {
     state.players.push({ id: uid(), name, team: smallestTeam() });
     input.value = '';
     input.focus();
-    render();
+    changed();
   });
 
   on(ref('name'), 'input', (e) => e.target.setCustomValidity(''));
@@ -136,7 +157,7 @@ export function mountTeamsSetup(root, options = {}) {
     const remove = e.target.closest('[data-remove]');
     if (remove) {
       state.players = state.players.filter((p) => p.id !== remove.dataset.remove);
-      render();
+      changed();
       return;
     }
     const count = e.target.closest('[data-count]');
@@ -151,7 +172,7 @@ export function mountTeamsSetup(root, options = {}) {
         if (sizes[max] - sizes[min] <= 1) break;
         membersOf(max).at(-1).team = min;
       }
-      render();
+      changed();
       return;
     }
     if (e.target.closest('[data-ref="shuffle"]')) {
@@ -162,7 +183,7 @@ export function mountTeamsSetup(root, options = {}) {
       }
       shuffled.forEach((p, i) => (p.team = i % state.count));
       state.players = shuffled;
-      render();
+      changed();
     }
   });
 
@@ -170,20 +191,28 @@ export function mountTeamsSetup(root, options = {}) {
     const sel = e.target.closest('[data-player]');
     if (sel) {
       state.players.find((p) => p.id === sel.dataset.player).team = Number(sel.value);
-      render();
+      changed();
     }
-    if (e.target.matches('[data-team-name]')) renderPlayers();
+    if (e.target.matches('[data-team-name]')) {
+      const i = Number(e.target.dataset.teamName);
+      const name = teamResult()[i].name;
+      renderPlayers();
+      if (name !== confirmedNames[i]) onRename(confirmedNames[i], name);
+      confirmedNames[i] = name;
+    }
   });
 
   on(root, 'input', (e) => {
     if (e.target.matches('[data-team-name]')) {
       state.teams[Number(e.target.dataset.teamName)].name = e.target.value;
+      onChange(snapshot());
     }
     if (e.target.matches('[data-team-color]')) {
       const i = Number(e.target.dataset.teamColor);
       state.teams[i].color = e.target.value;
       root.querySelector(`[data-team-card="${i}"]`).style.setProperty('--team', e.target.value);
       renderPlayers();
+      onChange(snapshot());
     }
   });
 
@@ -230,20 +259,17 @@ export function mountTeamsSetup(root, options = {}) {
     endDrag();
     if (card && p) {
       p.team = Number(card.dataset.teamCard);
-      render();
+      changed();
     }
   });
   on(window, 'pointercancel', endDrag);
 
   render();
+  const confirmedNames = state.teams.map((t) => t.name); // último nome já avisado em onRename
 
   return {
     getResult() {
-      const teams = state.teams.slice(0, state.count).map((t, i) => ({
-        name: t.name.trim() || `Equipe ${i + 1}`,
-        color: t.color,
-        players: membersOf(i).map((p) => p.name),
-      }));
+      const teams = teamResult();
       let error = null;
       if (state.players.length < minPerTeam * state.count) {
         error = `Adicione pelo menos ${minPerTeam * state.count} jogadores para ${state.count} equipes.`;
@@ -255,11 +281,28 @@ export function mountTeamsSetup(root, options = {}) {
         ok: !error,
         error,
         teams,
-        snapshot: {
-          players: state.players.map(({ name, team }) => ({ name, team })),
-          teams: teams.map(({ name, color }) => ({ name, color })),
-        },
+        snapshot: snapshot(),
       };
     },
   };
+}
+
+// Cadastro ligado ao armazenamento: carrega as equipes salvas e grava a cada
+// mudança, para recarregar a página não perder nada.
+export async function mountSavedTeams(root, options = {}) {
+  const { onChange = () => {}, onRename = () => {}, ...rest } = options;
+  const initial = (await storage.load(PLAYERS_KEY)) ?? {};
+  let saving = Promise.resolve();
+  return mountTeamsSetup(root, {
+    ...rest,
+    initial,
+    onChange: async (snapshot) => {
+      await storage.save(PLAYERS_KEY, snapshot);
+      onChange(snapshot);
+    },
+    // Em fila: dois nomes confirmados em seguida não podem se atropelar.
+    onRename: (from, to) => {
+      saving = saving.then(() => renameTeam(from, to)).then(() => onRename(from, to));
+    },
+  });
 }

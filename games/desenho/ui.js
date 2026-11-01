@@ -2,10 +2,11 @@ import { storage } from '../../assets/js/core/storage.js';
 import { createDie, renderPips } from '../../assets/js/core/dice.js';
 import { createTimer } from '../../assets/js/core/timer.js';
 import { boom as boomFx, mountClock } from '../../assets/js/core/clock.js';
-import { mountTeamsSetup } from '../../assets/js/core/teams-setup.js';
+import { mountSavedTeams } from '../../assets/js/core/teams-setup.js';
 import { $, esc } from '../../assets/js/core/dom.js';
 import {
   CATEGORIES,
+  categoryName,
   drawerOf,
   lastCell,
   migrate,
@@ -17,25 +18,25 @@ import {
 import { createBoardView } from './board.js';
 import { TIPS } from './tips.js';
 import { createPractice } from '../../assets/js/core/practice.js';
-import { mountHowTo, mountMenuDrawer } from '../../assets/js/core/shell.js';
+import { mountHowTo, mountMenuDrawer, mountTeamsDialog } from '../../assets/js/core/shell.js';
 
 const SAVE_KEY = 'desenho:current';
 const SETUP_KEY = 'desenho:setup';
-const PLAYERS_KEY = 'players'; // compartilhado entre os jogos da central
 const HISTORY_MAX = 40;
 const SCREENS = ['loading', 'resume', 'setup'];
 const ALL_COLOR = '#ff8a00'; // "todos jogam" usa o laranja do tabuleiro
 const SHORT_NAME = { P: 'Pessoa', O: 'Objeto', A: 'Ação', D: 'Difícil', L: 'Lazer', M: 'Mix' };
 
 const STYLE_TEXT = {
-  desenho: { role: 'Desenhista' },
-  mimica: { role: 'Mímico' },
+  desenho: { role: 'Desenhista', verb: 'desenha' },
+  mimica: { role: 'Mímico', verb: 'faz a mímica' },
 };
 
 let game = null; // { state, history }
 let setup = null;
 let busy = false;
 let pendingCategory = null; // categoria marcada antes de iniciar (opcional)
+let pendingRoll = null; // casas já tiradas no dado virtual, antes de iniciar
 let forceAll = false; // "todos jogam" forçado para a próxima rodada
 let resultKey = null;
 let selectedRound = null;
@@ -60,6 +61,18 @@ const practice = createPractice({
 mountHowTo($('#menu-dialog'));
 mountMenuDrawer($('#menu-dialog'));
 
+const performerTeam = (s) => (['ready', 'drawing'].includes(s.phase) ? (s.round?.starter ?? s.current) : null);
+
+const openTeams = mountTeamsDialog({
+  teams: () => game?.state.teams ?? [],
+  activeId: () => {
+    const s = game?.state;
+    return s ? (s.phase === 'won' ? s.winner : s.phase === 'move' ? s.mover : s.current) : null;
+  },
+  info: (t) => positionLabel(game.state, t.pos),
+  currentPlayer: (t) => (t.id === performerTeam(game.state) ? drawerOf(t) : null),
+});
+
 const boards = { small: createBoardView($('#board-mini')), large: createBoardView($('#board-large')) };
 const timer = createTimer({ onTick: updateClock, onEnd: () => boomFx($('#screen-game')) });
 const clock = mountClock($('#clock-wrap'), { onTap: onClockTap, stateEl: $('#timer-area') });
@@ -73,8 +86,10 @@ $('#cats').innerHTML =
     (c) => `<button class="cat" type="button" data-face="${c.key}" title="${esc(c.name)}" aria-pressed="false">
       <b>${c.key}</b><small>${SHORT_NAME[c.key]}</small>
     </button>`,
-  ).join('') + `<button class="cat cat-die" type="button" id="btn-roll-cat" title="Sortear categoria"><small>Sortear</small></button>`;
+  ).join('') + `<button class="cat cat-die" type="button" id="btn-roll-cat" title="Rolar os dados"><small>Rolar dados</small></button>`;
 const catDie = createDie($('#cats'), CATEGORIES.map((c) => c.key), { render: highlightFace });
+const dieCat = createDie($('#die-cat'), CATEGORIES.map((c) => c.key), { duration: 900 });
+const dieNum = createDie($('#die-num'), [1, 2, 3, 4, 5, 6], { render: renderPips, duration: 900 });
 
 const text = () => STYLE_TEXT[game.state.settings.style] ?? STYLE_TEXT.desenho;
 const settings = () => game.state.settings;
@@ -148,9 +163,13 @@ function applySettings(patch) {
 
 function undo() {
   if (busy || !game.history.length) return;
-  game.state = { ...game.history.pop(), settings: game.state.settings };
+  let past = game.history.pop();
+  // Com dado virtual o peão anda sozinho: voltar à fase de andar andaria de novo.
+  if (past.phase === 'move' && settings().virtualDice && game.history.length) past = game.history.pop();
+  game.state = { ...past, settings: game.state.settings };
   selected.clear();
   pendingCategory = null;
+  pendingRoll = null;
   forceAll = false;
   resultKey = null;
   timer.reset(game.state.settings.timer);
@@ -210,7 +229,6 @@ function renderWho(s) {
   } else if (isAllRound(s)) {
     const r = s.round;
     const starter = s.teams[r?.starter ?? s.current];
-    const teams = r ? r.participants.map((id) => s.teams[id]) : s.teams;
     const type = r?.type ?? roundTypeFor(s, s.current);
     kicker = r?.tie
       ? 'Desempate · nova carta, mesma categoria'
@@ -220,9 +238,7 @@ function renderWho(s) {
           ? `${starter.name} escolhe a categoria`
           : `Rodada de ${starter.name}`;
     title = 'Todos jogam';
-    chips = teams
-      .map((tm) => `<span class="chip" style="--team:${tm.color}"><span class="dot"></span>${esc(tm.name)} · ${esc(drawerOf(tm))}</span>`)
-      .join('');
+    chips = `<span class="chip" style="--team:${starter.color}"><span class="dot"></span><span><b>${esc(drawerOf(starter))}</b> ${t.verb}${r?.tie ? ` · ${esc(starter.name)}` : ''}</span></span>`;
   } else {
     const team = s.teams[s.current];
     kicker = 'Vez da equipe';
@@ -239,7 +255,7 @@ function renderCats(s) {
   $('#cats').classList.toggle('is-locked', !ready);
   $('#btn-roll-cat').hidden = !settings().virtualDice;
   $('#cats').querySelectorAll('button').forEach((b) => (b.disabled = !ready || busy));
-  if (!catDie.rolling) catDie.set(ready ? pendingCategory : (s.round?.category ?? null));
+  catDie.set(ready ? pendingCategory : (s.round?.category ?? null));
 }
 
 function renderResult(s) {
@@ -249,7 +265,7 @@ function renderResult(s) {
   resultKey = key;
 
   if (s.phase === 'ready') {
-    el.innerHTML = `<p class="result-hint">Escolha a categoria (opcional) e toque no relógio para começar.</p>`;
+    el.innerHTML = `<p class="result-hint">${settings().virtualDice ? 'Toque no relógio para rolar os dados.' : 'Escolha a categoria (opcional) e toque no relógio para começar.'}</p>`;
     return;
   }
 
@@ -310,7 +326,10 @@ function renderResult(s) {
 
 async function autoRoll() {
   setBusy(true);
-  const value = await bigDie.roll();
+  // O número já saiu na modal; só rola aqui em partida sem esse número salvo.
+  let value = game.state.round?.roll;
+  if (value) bigDie.set(value);
+  else value = await bigDie.roll();
   $('#roll-text').textContent = `Ande ${value} casa${value > 1 ? 's' : ''}!`;
   await new Promise((r) => setTimeout(r, 1100));
   setBusy(false);
@@ -324,7 +343,7 @@ function renderSidebar(s) {
   const card = $('#turn-card');
   card.style.setProperty('--team', all ? ALL_COLOR : team.color);
   card.innerHTML = all
-    ? `<span class="turn-kicker">Vez de ${esc(team.name)}</span><strong>Todos jogam</strong><span class="turn-sub">Cada equipe com seu ${t.role.toLowerCase()}</span>`
+    ? `<span class="turn-kicker">Vez de ${esc(team.name)}</span><strong>Todos jogam</strong><span class="turn-sub">${t.role}: ${esc(drawerOf(team))}</span>`
     : `<span class="turn-kicker">Vez da</span><strong>${esc(team.name)}</strong><span class="turn-sub">${t.role}: ${esc(drawerOf(team))}</span>`;
 
   const natural = s.phase === 'ready' && roundTypeFor(s, s.current) !== 'normal';
@@ -334,12 +353,13 @@ function renderSidebar(s) {
   allBtn.title = natural ? 'O peão está numa casa de todos jogam' : 'Forçar todos jogam na próxima rodada';
 
   const focus = s.phase === 'move' ? s.mover : s.current;
+  const performer = performerTeam(s);
   $('#team-list').innerHTML = s.teams
     .map(
       (tm) => `
       <li class="team-item ${tm.id === focus ? 'is-active' : ''}" style="--team:${tm.color}">
         <span class="team-dot">${tm.id + 1}</span>
-        <span class="team-name">${esc(tm.name)}<small>${t.role}: ${esc(drawerOf(tm))}</small></span>
+        <span class="team-name">${esc(tm.name)}<small>${tm.id === performer ? `${t.role}: ${esc(drawerOf(tm))}` : tm.players.map(esc).join(', ')}</small></span>
         <span class="team-pos">${positionLabel(s, tm.pos)}</span>
         <span class="team-bar"><span style="width:${(tm.pos / lastCell(s)) * 100}%"></span></span>
       </li>`,
@@ -395,6 +415,7 @@ function enterGame() {
   selectedRound = game.state.round?.id ?? null;
   resultKey = null;
   pendingCategory = null;
+  pendingRoll = null;
   forceAll = false;
   selected.clear();
   timer.setSound(settings().sound);
@@ -403,7 +424,7 @@ function enterGame() {
 }
 
 async function enterSetup() {
-  const [saved, players] = await Promise.all([storage.load(SETUP_KEY), storage.load(PLAYERS_KEY)]);
+  const saved = await storage.load(SETUP_KEY);
   const st = migrate({ settings: saved?.settings }).settings;
   $('#opt-timer').value = String(st.timer);
   $('#opt-style').value = st.style;
@@ -411,7 +432,7 @@ async function enterSetup() {
   $('#opt-board-size').value = st.boardSize;
   $('#opt-dice').checked = st.virtualDice;
   $('#setup-error').textContent = '';
-  setup = mountTeamsSetup($('#teams-setup'), { initial: players ?? {} });
+  setup = await mountSavedTeams($('#teams-setup'));
   showPre('setup');
 }
 
@@ -434,20 +455,89 @@ function restartSameTeams(opts) {
 
 // ---------- eventos ----------
 
-// O relógio é o botão principal: inicia a rodada e depois pausa/continua.
+async function startRound() {
+  const action = { type: 'start', category: pendingCategory, all: forceAll, roll: settings().virtualDice ? pendingRoll : null };
+  pendingCategory = null;
+  pendingRoll = null;
+  forceAll = false;
+  await dispatch(action);
+  timer.start();
+}
+
+// O relógio é o botão principal: inicia a rodada (com dado virtual, passando
+// pela modal dos dados) e depois pausa/continua.
 async function onClockTap() {
   if (busy) return;
   const s = game.state;
   if (s.phase === 'ready') {
-    const action = { type: 'start', category: pendingCategory, all: forceAll };
-    pendingCategory = null;
-    forceAll = false;
-    await dispatch(action);
-    timer.start();
+    if (settings().virtualDice) openDice();
+    else await startRound();
   } else if (s.phase === 'drawing') {
     timer.toggle();
   }
 }
+
+// ---------- modal dos dados ----------
+
+// Na casa "escolha a categoria" a equipe escolhe em vez de rolar.
+const isChoosing = (s) => roundTypeFor(s, s.current) === 'escolha';
+
+function renderDice() {
+  const s = game.state;
+  const team = s.teams[s.current];
+  const choosing = isChoosing(s);
+  $('#dice-dialog').style.setProperty('--clock', clockColor(s));
+  $('#dice-kicker').textContent = isAllRound(s) ? `Vez de ${team.name} · todos jogam` : `Vez de ${team.name}`;
+  $('#dice-title').textContent = `${drawerOf(team)} ${text().verb}`;
+  $('#die-cat').hidden = choosing;
+  $('#dice-choice').hidden = !choosing;
+  if (choosing) {
+    $('#dice-choice').innerHTML = CATEGORIES.map(
+      (c) => `<button class="cat" type="button" data-pick="${c.key}" aria-pressed="${c.key === pendingCategory}"><b>${c.key}</b><small>${SHORT_NAME[c.key]}</small></button>`,
+    ).join('');
+  }
+  $('#die-cat-label').textContent = pendingCategory ? categoryName(pendingCategory) : choosing ? 'Escolha a categoria' : 'Categoria';
+  $('#die-num-label').textContent = pendingRoll ? `Se acertar, anda ${pendingRoll} casa${pendingRoll > 1 ? 's' : ''}` : 'Casas';
+  $('#btn-dice-go').disabled = !pendingRoll || (choosing && !pendingCategory);
+}
+
+async function openDice() {
+  const choosing = isChoosing(game.state);
+  dieCat.set(pendingCategory);
+  dieNum.set(pendingRoll);
+  renderDice();
+  const dialog = $('#dice-dialog');
+  dialog.returnValue = '';
+  dialog.showModal();
+  if (pendingRoll && (pendingCategory || choosing)) return;
+  setBusy(true);
+  const [category, roll] = await Promise.all([
+    pendingCategory || choosing ? pendingCategory : dieCat.roll(),
+    pendingRoll ?? dieNum.roll(),
+  ]);
+  pendingCategory = category;
+  pendingRoll = roll;
+  setBusy(false);
+  renderDice();
+  render();
+  $('#btn-dice-go').focus();
+}
+
+$('#dice-choice').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-pick]');
+  if (!b) return;
+  pendingCategory = b.dataset.pick;
+  renderDice();
+  render();
+});
+
+$('#btn-dice-go').addEventListener('click', async () => {
+  $('#dice-dialog').close('go');
+  await startRound();
+});
+
+$('#teams-fab').addEventListener('click', openTeams);
+$('#btn-teams').addEventListener('click', openTeams);
 
 // Reiniciar no meio da rodada pergunta o resultado antes.
 $('#btn-restart').addEventListener('click', () => {
@@ -483,12 +573,7 @@ $('#restart-dialog').addEventListener('close', () => {
 $('#cats').addEventListener('click', async (e) => {
   if (busy || game.state.phase !== 'ready') return;
   if (e.target.closest('#btn-roll-cat')) {
-    setBusy(true);
-    catDie.rolling = true;
-    pendingCategory = await catDie.roll();
-    catDie.rolling = false;
-    setBusy(false);
-    render();
+    openDice();
     return;
   }
   const b = e.target.closest('[data-face]');
@@ -608,7 +693,7 @@ async function startFromSetup(opts) {
     boardSize: $('#opt-board-size').value,
     virtualDice: $('#opt-dice').checked,
   };
-  await Promise.all([storage.save(PLAYERS_KEY, result.snapshot), storage.save(SETUP_KEY, { settings: gameSettings })]);
+  await storage.save(SETUP_KEY, { settings: gameSettings });
   startGame(result.teams, gameSettings, opts);
 }
 

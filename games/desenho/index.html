@@ -39,9 +39,9 @@
       <section class="card stack how">
         <h2>Como jogar</h2>
         <ol>
-          <li>As equipes se revezam: um jogador pega uma carta e desenha (ou faz mímica) para a própria equipe adivinhar.</li>
-          <li>A casa do peão diz a rodada: casa comum = só a equipe da vez; casa laranja = <b>todos jogam</b>.</li>
-          <li>Toque no relógio para começar. Acertou: rola o dado e anda. Errou: a vez passa.</li>
+          <li>As equipes se revezam: o app diz quem pega a carta e desenha (ou faz mímica). É sempre uma pessoa só.</li>
+          <li>A casa do peão diz a rodada: casa comum = só a equipe da vez adivinha; casa laranja = <b>todos jogam</b>, e todas as equipes adivinham.</li>
+          <li>Toque no relógio: com dados virtuais, rolam a categoria e as casas. Acertou: anda. Errou: a vez passa.</li>
           <li>Quem chegar ao Fim e acertar primeiro numa rodada de todos jogam vence.</li>
         </ol>
       </section>
@@ -119,6 +119,7 @@
     </section>
 
     <button class="side-toggle glass" id="side-toggle" type="button" aria-controls="sidebar" aria-expanded="false">☰</button>
+    <button class="teams-fab glass" id="teams-fab" type="button" title="Ver equipes" aria-label="Ver equipes">👥</button>
 
     <aside class="sidebar glass" id="sidebar" aria-label="Informações da partida">
       <span class="practice-badge" id="practice-badge" hidden>Treino</span>
@@ -130,6 +131,7 @@
       <div class="board-mini" id="board-mini" hidden></div>
       <p class="last-log" id="last-log"></p>
       <div class="side-actions">
+        <button class="side-btn side-btn-wide" id="btn-teams" type="button"><span aria-hidden="true">👥</span>Equipes</button>
         <button class="side-btn" id="btn-settings" type="button"><span aria-hidden="true">⚙</span>Ajustes</button>
         <button class="side-btn" id="btn-undo" type="button"><span aria-hidden="true">↶</span>Desfazer</button>
         <button class="side-btn" id="btn-fullscreen" type="button"><span aria-hidden="true">⛶</span>Tela cheia</button>
@@ -139,6 +141,28 @@
 
     <div class="flash" id="flash" aria-hidden="true"></div>
   </main>
+
+  <dialog id="dice-dialog">
+    <form method="dialog" class="stack">
+      <div class="dice-who">
+        <p class="who-kicker" id="dice-kicker"></p>
+        <h2 id="dice-title"></h2>
+      </div>
+      <div class="dice-pair">
+        <div class="dice-slot" id="dice-cat-slot">
+          <div class="big-die die-letter" id="die-cat"></div>
+          <div class="dice-choice" id="dice-choice" hidden></div>
+          <p class="dice-label" id="die-cat-label"></p>
+        </div>
+        <div class="dice-slot">
+          <div class="big-die" id="die-num"></div>
+          <p class="dice-label" id="die-num-label"></p>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-lg" id="btn-dice-go" type="button" disabled>Começar rodada</button>
+      <button class="btn btn-ghost" value="cancel">Cancelar</button>
+    </form>
+  </dialog>
 
   <dialog id="settings-dialog">
     <form method="dialog" class="stack">
@@ -159,7 +183,7 @@
       <label class="switch-field">
         <input type="checkbox" id="set-sound">
         <span class="switch" aria-hidden="true"></span>
-        <span>Som (tique-taque e explosão)</span>
+        <span>Som (tique-taque, explosão e sirene)</span>
       </label>
       <div class="setting-row">
         <span>Tabuleiro</span>

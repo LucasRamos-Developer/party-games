@@ -22,6 +22,7 @@ let coaching = false; // balões do treino abertos: timer pausado sem borrar a c
 let resumeAfterTips = false;
 
 const shell = createShell({
+  currentPlayer: explainerOf,
   store,
   settingsKey: 'fala:setup',
   tips: TIPS,
